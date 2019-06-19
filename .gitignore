@@ -1,7 +1,18 @@
+## DATA TEST
+test/
+
+## Contaienr images
+*.img
+*.simg
+log
+## Nextflow results and logs
 .nextflow*
+.nextflow/
 work/
 data/
 results/
+results2/
+
+## Oter
 .DS_Store
-tests/test_data
 *.pyc
