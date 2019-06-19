@@ -31,6 +31,4 @@ The BU-ISCIII/rnaseq pipeline comes with documentation about the pipeline, found
 5. [Troubleshooting](docs/troubleshooting.md)
 
 ### Credits
-These scripts were originally written for use at the [National Genomics Infrastructure](https://portal.scilifelab.se/genomics/), part of [SciLifeLab](http://www.scilifelab.se/) in Stockholm, Sweden, by Phil Ewels ([@ewels](https://github.com/ewels)) and Rickard Hammarén ([@Hammarn](https://github.com/Hammarn)).
-
-Many thanks to [@nf-core](https://github.com/nf-core) whose pipeline helped us to develop our own.
+These scripts were originally written by [@nf-core](https://github.com/nf-core), whose pipeline helped us to develop our own.
