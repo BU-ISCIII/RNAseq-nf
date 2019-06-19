@@ -13,6 +13,14 @@ From: buisciii/centos7_base_image:latest
     yum -y install python-setuptools
     easy_install pip
 
+
+    echo "Install miniconda"
+    curl -fsSL https://repo.continuum.io/miniconda/Miniconda3-4.6.14-Linux-x86_64.sh -o miniconda_v4.6.14.sh
+    bash miniconda_v4.6.14.sh -b -p /opt/miniconda
+    echo "export PATH=/opt/miniconda/bin:$PATH" >> $SINGULARITY_ENVIRONMENT
+
+
+
     echo "Installing SCI-F"
     pip install scif
 
