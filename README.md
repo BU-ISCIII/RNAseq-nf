@@ -1,4 +1,4 @@
-# ![nf-core/rnaseq](docs/images/nfcore-rnaseq_logo.png)
+# ![nf-core/rnaseq](docs/images/BU_ISCIII_logo.png)
 
 [![Build Status](https://travis-ci.org/nf-core/rnaseq.svg?branch=master)](https://travis-ci.org/nf-core/rnaseq)
 [![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A50.32.0-brightgreen.svg)](https://www.nextflow.io/)
