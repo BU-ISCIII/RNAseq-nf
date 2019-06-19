@@ -29,28 +29,24 @@ From: buisciii/centos7_base_image:latest
     echo "Installing trimmomatic app" && \
     scif install /opt/scif_app_recipes/trimmomatic_v0.38_centos7.scif && \
     echo "Installing bwa app" && \
-    scif install /opt/scif_app_recipes/bwa_v0.7.17_centos7.scif && \
-    echo "Installing picard app" && \
-    scif install /opt/scif_app_recipes/picard_v1.140_centos7.scif && \
-    echo "Installing htslib app" && \
-    scif install /opt/scif_app_recipes/htslib_v1.9_centos7.scif && \
-    echo "Installing bedtools app" && \
-    scif install /opt/scif_app_recipes/bedtools_v2.27_centos7.scif && \
+    
+    
+    
     echo "Installing samtools app" && \
     scif install /opt/scif_app_recipes/samtools_v1.9_centos7.scif && \
-    echo "Installing varscan app" && \
-    scif install /opt/scif_app_recipes/varscan_v2.3.9_centos7.scif && \
-    echo "Installing bcftools app" && \
-    scif install /opt/scif_app_recipes/bcftools_v1.9_centos7.scif && \
-    echo "Installing kggseq app" && \
-    scif install /opt/scif_app_recipes/kggseq_v1.1_centos7.scif && \
+    
+    
+    
     echo "Installing R app" && \
     scif install /opt/scif_app_recipes/R_v3.5.1_centos7.scif && \
+    
+    
+    
     echo "Installing multiqc app" && \
-    scif install /opt/scif_app_recipes/multiqc_v1.8dev_centos7.scif && \
-    echo "Installing bamutil app" && \
-    scif install /opt/scif_app_recipes/bamutil_v1.0.13_centos7.scif
-	
+    scif install /opt/scif_app_recipes/multiqc_v1.7_centos7.scif && \
+    
+    
+    
 
 
     # Executables must be exported for nextflow, if you use their singularity native integration.
