@@ -32,7 +32,15 @@ From: buisciii/centos7_base_image:latest
     scif install /opt/scif_app_recipes/STAR_v2.6.1d_centos7.scif       
     echo "Installing Hisat2 app" && \
     scif install /opt/scif_app_recipes/hisat2_v2.1.0_centos7.scif
-
+    echo "Installing Picard app" && \
+    scif install /opt/scif_app_recipes/picard_v2.18.27_centos7.scif
+    
+    ######bioconductor-dupradar=1.12.1
+    ######conda-forge::r-data.table=1.12.0
+    ######conda-forge::r-gplots=3.0.1.1
+    ######bioconductor-edger=3.24.1
+    ######conda-forge::r-markdown=0.9
+    
     
     
     
