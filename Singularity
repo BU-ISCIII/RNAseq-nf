@@ -41,7 +41,9 @@ From: buisciii/centos7_base_image:latest
     ######bioconductor-edger=3.24.1
     ######conda-forge::r-markdown=0.9
     
-    
+    echo "Installing csvtk app" && \
+    scif install /opt/scif_app_recipes/csvtk_v0.17.0_centos7.scif
+   
     
     
     echo "Installing samtools app" && \
