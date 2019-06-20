@@ -30,6 +30,9 @@ From: buisciii/centos7_base_image:latest
     scif install /opt/scif_app_recipes/trimmomatic_v0.38_centos7.scif && \
     echo "Installing STAR app" && \
     scif install /opt/scif_app_recipes/STAR_v2.6.1d_centos7.scif       
+    echo "Installing Hisat2 app" && \
+    scif install /opt/scif_app_recipes/hisat2_v2.1.0_centos7.scif
+
     
     
     
