@@ -28,7 +28,8 @@ From: buisciii/centos7_base_image:latest
     scif install /opt/scif_app_recipes/fastqc_v0.11.7_centos7.scif && \
     echo "Installing trimmomatic app" && \
     scif install /opt/scif_app_recipes/trimmomatic_v0.38_centos7.scif && \
-    echo "Installing bwa app" && \
+    echo "Installing STAR app" && \
+    scif install /opt/scif_app_recipes/STAR_v2.6.1d_centos7.scif       
     
     
     
@@ -43,7 +44,7 @@ From: buisciii/centos7_base_image:latest
     
     
     echo "Installing multiqc app" && \
-    scif install /opt/scif_app_recipes/multiqc_v1.7_centos7.scif && \
+    scif install /opt/scif_app_recipes/multiqc_v1.7_centos7.scif
     
     
     
@@ -57,7 +58,6 @@ From: buisciii/centos7_base_image:latest
 
     if [[ ":$PATH:" == *":/scif/apps/snppipeline:"* ]];then
 
-        export CLASSPATH=/scif/apps/varscan/varscan-2.3.9/varscan-2.3.9.jar:$CLASSPATH >> $SINGULARITY_ENVIRONMENT
         export CLASSPATH=/scif/apps/picard/picard.jar:$CLASSPATH >> $SINGULARITY_ENVIRONMENT
 
     fi
