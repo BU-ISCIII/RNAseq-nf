@@ -43,18 +43,23 @@ From: buisciii/centos7_base_image:latest
     
     echo "Installing csvtk app" && \
     scif install /opt/scif_app_recipes/csvtk_v0.17.0_centos7.scif
+    
+    ########FIX PRESEQ
     echo "Installing preseq app" && \
     scif install /opt/scif_app_recipes/preseq_v2.0.3_centos7.scif
-   
+    ####################
     
-    
+    echo "Installing R app" && \
+    scif install /opt/scif_app_recipes/R_v3.5.1_centos7.scif && \
+    ########FIX RSeQC
+    echo "Installing RSeQC app" && \
+    scif install /opt/scif_app_recipes/RSeQC_v3.0.0_centos7.scif
+    ####################
     echo "Installing samtools app" && \
     scif install /opt/scif_app_recipes/samtools_v1.9_centos7.scif && \
     
     
     
-    echo "Installing R app" && \
-    scif install /opt/scif_app_recipes/R_v3.5.1_centos7.scif && \
     
     
     
