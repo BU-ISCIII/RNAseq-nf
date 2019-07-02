@@ -59,6 +59,8 @@ From: buisciii/centos7_base_image:latest
     scif install /opt/scif_app_recipes/samtools_v1.9_centos7.scif && \
     echo "Installing stringtie app" && \
     scif install /opt/scif_app_recipes/stringtie_v1.3.5_centos7.scif
+    echo "Installing subread app" && \
+    scif install /opt/scif_app_recipes/subread_v1.6.4_centos7.scif
 
     
     
