@@ -63,19 +63,11 @@ From: buisciii/centos7_base_image:latest
     scif install /opt/scif_app_recipes/subread_v1.6.4_centos7.scif
     echo "Installing gffread app" && \
     scif install /opt/scif_app_recipes/gffread_v0.9.12_centos7.scif
-
-    
-    
-    
-    
-    
+    echo "Installing deeptools app" && \
+    scif install /opt/scif_app_recipes/deeptools_v2.5.4_centos7.scif
     echo "Installing multiqc app" && \
     scif install /opt/scif_app_recipes/multiqc_v1.7_centos7.scif
     
-    
-    
-
-
     # Executables must be exported for nextflow, if you use their singularity native integration.
     # It would be cool to use $SCIF_APPBIN_bwa variable, but it must be set after PATH variable, because I tried to use it here and in %environment without success.
     find /scif/apps -maxdepth 2 -name "bin" | while read in; do echo "export PATH=\${PATH}:$in" >> $SINGULARITY_ENVIRONMENT;done
