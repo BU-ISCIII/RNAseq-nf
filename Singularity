@@ -36,10 +36,8 @@ From: buisciii/centos7_base_image:latest
     scif install /opt/scif_app_recipes/picard_v2.18.27_centos7.scif
     
     ######bioconductor-dupradar=1.12.1
-    ######conda-forge::r-data.table=1.12.0
     ######conda-forge::r-gplots=3.0.1.1
     ######bioconductor-edger=3.24.1
-    ######conda-forge::r-markdown=0.9
     
     echo "Installing csvtk app" && \
     scif install /opt/scif_app_recipes/csvtk_v0.17.0_centos7.scif
@@ -83,8 +81,11 @@ From: buisciii/centos7_base_image:latest
     
     # Install core R dependencies
     echo "r <- getOption('repos'); r['CRAN'] <- 'https://ftp.acc.umu.se/mirror/CRAN/'; options(repos = r);" > ~/.Rprofile && \
-    Rscript -e "install.packages('ggplot2',dependencies=TRUE,lib='/usr/local/lib64/R/library')" && \
-    
+    Rscript -e "source('https://bioconductor.org/biocLite.R');biocLite('dupradar',dependencies=TRUE,lib='/usr/local/lib64/R/library')" && \
+    Rscript -e "install.packages('data.table',dependencies=TRUE,lib='/usr/local/lib64/R/library')" && \
+    Rscript -e "install.packages('gplots',dependencies=TRUE,lib='/usr/local/lib64/R/library')" && \
+    Rscript -e "source('https://bioconductor.org/biocLite.R');biocLite('edger',dependencies=TRUE,lib='/usr/local/lib64/R/library')" && \
+    Rscript -e "install.packages('markdown',dependencies=TRUE,lib='/usr/local/lib64/R/library')"
 
 %runscript
     exec scif "$@"
