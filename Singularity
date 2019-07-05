@@ -79,6 +79,12 @@ From: buisciii/centos7_base_image:latest
         export CLASSPATH=/scif/apps/picard/picard.jar:$CLASSPATH >> $SINGULARITY_ENVIRONMENT
 
     fi
+    ## R packages
+    
+    # Install core R dependencies
+    echo "r <- getOption('repos'); r['CRAN'] <- 'https://ftp.acc.umu.se/mirror/CRAN/'; options(repos = r);" > ~/.Rprofile && \
+    Rscript -e "install.packages('ggplot2',dependencies=TRUE,lib='/usr/local/lib64/R/library')" && \
+    
 
 %runscript
     exec scif "$@"
