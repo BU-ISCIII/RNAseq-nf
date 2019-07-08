@@ -17,8 +17,9 @@ From: buisciii/centos7_base_image:latest
     echo "Install miniconda"
     curl -fsSL https://repo.continuum.io/miniconda/Miniconda3-4.6.14-Linux-x86_64.sh -o miniconda_v4.6.14.sh
     bash miniconda_v4.6.14.sh -b -p /opt/miniconda
-    echo "export PATH=/opt/miniconda/bin:$PATH" >> $SINGULARITY_ENVIRONMENT
-
+    echo 'export PATH="/opt/miniconda/bin:$PATH"' >> $SINGULARITY_ENVIRONMENT
+    ln -s /opt/miniconda/bin/conda bin
+    conda init; conda config --append channels conda-forge; conda config --add channels defaults; conda config --add channels bioconda
 
 
     echo "Installing SCI-F"
@@ -33,36 +34,25 @@ From: buisciii/centos7_base_image:latest
     echo "Installing Hisat2 app" && \
     scif install /opt/scif_app_recipes/hisat2_v2.1.0_centos7.scif
     echo "Installing Picard app" && \
-    scif install /opt/scif_app_recipes/picard_v2.18.27_centos7.scif
-    
-    ######bioconductor-dupradar=1.12.1
-    ######conda-forge::r-gplots=3.0.1.1
-    ######bioconductor-edger=3.24.1
-    
+    scif install /opt/scif_app_recipes/picard_v2.18.27_centos7.scif    
     echo "Installing csvtk app" && \
     scif install /opt/scif_app_recipes/csvtk_v0.17.0_centos7.scif
-    
-    ########FIX PRESEQ
     echo "Installing preseq app" && \
     scif install /opt/scif_app_recipes/preseq_v2.0.3_centos7.scif
-    ####################
-    
     echo "Installing R app" && \
     scif install /opt/scif_app_recipes/R_v3.5.1_centos7.scif && \
-    ########FIX RSeQC
     echo "Installing RSeQC app" && \
     scif install /opt/scif_app_recipes/RSeQC_v3.0.0_centos7.scif
-    ####################
     echo "Installing samtools app" && \
     scif install /opt/scif_app_recipes/samtools_v1.9_centos7.scif && \
     echo "Installing stringtie app" && \
-    scif install /opt/scif_app_recipes/stringtie_v1.3.5_centos7.scif
+    scif install /opt/scif_app_recipes/stringtie_v1.3.5_centos7.scif && \
     echo "Installing subread app" && \
-    scif install /opt/scif_app_recipes/subread_v1.6.4_centos7.scif
+    scif install /opt/scif_app_recipes/subread_v1.6.4_centos7.scif && \
     echo "Installing gffread app" && \
-    scif install /opt/scif_app_recipes/gffread_v0.9.12_centos7.scif
+    scif install /opt/scif_app_recipes/gffread_v0.9.12_centos7.scif && \
     echo "Installing deeptools app" && \
-    scif install /opt/scif_app_recipes/deeptools_v2.5.4_centos7.scif
+    scif install /opt/scif_app_recipes/deeptools_v2.5.4_centos7.scif && \
     echo "Installing multiqc app" && \
     scif install /opt/scif_app_recipes/multiqc_v1.7_centos7.scif
     
