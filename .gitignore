@@ -1,6 +1,7 @@
 ## DATA TEST
 test/
 *_trial
+*_original
 ## Contaienr images
 *.img
 *.simg
