@@ -30,19 +30,19 @@ From: buisciii/centos7_base_image:latest
     echo "Installing trimmomatic app" && \
     scif install /opt/scif_app_recipes/trimmomatic_v0.38_centos7.scif && \
     echo "Installing STAR app" && \
-    scif install /opt/scif_app_recipes/STAR_v2.6.1d_centos7.scif       
+    scif install /opt/scif_app_recipes/STAR_v2.6.1d_centos7.scif && \
     echo "Installing Hisat2 app" && \
-    scif install /opt/scif_app_recipes/hisat2_v2.1.0_centos7.scif
+    scif install /opt/scif_app_recipes/hisat2_v2.1.0_centos7.scif && \
     echo "Installing Picard app" && \
-    scif install /opt/scif_app_recipes/picard_v2.18.27_centos7.scif    
+    scif install /opt/scif_app_recipes/picard_v2.18.27_centos7.scif && \
     echo "Installing csvtk app" && \
-    scif install /opt/scif_app_recipes/csvtk_v0.17.0_centos7.scif
+    scif install /opt/scif_app_recipes/csvtk_v0.17.0_centos7.scif && \
     echo "Installing preseq app" && \
-    scif install /opt/scif_app_recipes/preseq_v2.0.3_centos7.scif
+    scif install /opt/scif_app_recipes/preseq_v2.0.3_centos7.scif && \
     echo "Installing R app" && \
     scif install /opt/scif_app_recipes/R_v3.5.1_centos7.scif && \
     echo "Installing RSeQC app" && \
-    scif install /opt/scif_app_recipes/RSeQC_v3.0.0_centos7.scif
+    scif install /opt/scif_app_recipes/RSeQC_v3.0.0_centos7.scif && \
     echo "Installing samtools app" && \
     scif install /opt/scif_app_recipes/samtools_v1.9_centos7.scif && \
     echo "Installing stringtie app" && \
