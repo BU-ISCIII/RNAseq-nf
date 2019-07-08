@@ -81,10 +81,10 @@ From: buisciii/centos7_base_image:latest
     
     # Install core R dependencies
     echo "r <- getOption('repos'); r['CRAN'] <- 'https://ftp.acc.umu.se/mirror/CRAN/'; options(repos = r);" > ~/.Rprofile && \
-    Rscript -e "source('https://bioconductor.org/biocLite.R');biocLite('dupradar',dependencies=TRUE,lib='/usr/local/lib64/R/library')" && \
+    Rscript -e "source('https://bioconductor.org/biocLite.R');biocLite('dupRadar',dependencies=TRUE,lib='/usr/local/lib64/R/library')" && \
     Rscript -e "install.packages('data.table',dependencies=TRUE,lib='/usr/local/lib64/R/library')" && \
     Rscript -e "install.packages('gplots',dependencies=TRUE,lib='/usr/local/lib64/R/library')" && \
-    Rscript -e "source('https://bioconductor.org/biocLite.R');biocLite('edger',dependencies=TRUE,lib='/usr/local/lib64/R/library')" && \
+    Rscript -e "source('https://bioconductor.org/biocLite.R');biocLite('edgeR',dependencies=TRUE,lib='/usr/local/lib64/R/library')" && \
     Rscript -e "install.packages('markdown',dependencies=TRUE,lib='/usr/local/lib64/R/library')"
 
 %runscript
