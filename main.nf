@@ -356,8 +356,7 @@ if(params.aligner == 'star' && !params.star_index && params.fasta){
         file "star" into star_index
 
         script:
-//        def avail_mem = task.memory ? "--limitGenomeGenerateRAM ${task.memory.toBytes() - 100000000}" : ''
-        def avail_mem = task.memory ? "--limitGenomeGenerateRAM 8747247658" : ''
+        def avail_mem = task.memory ? "--limitGenomeGenerateRAM ${task.memory.toBytes() - 100000000}" : ''
 
         """
         mkdir star
