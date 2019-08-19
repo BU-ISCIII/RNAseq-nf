@@ -73,7 +73,6 @@ def helpMessage() {
       --gff                         Path to GFF3 file
       --bed12                       Path to bed12 file
       --saveReference               Save the generated reference files the the Results directory.
-      --saveTrimmed                 Save trimmed FastQ file intermediates
       --saveAlignedIntermediates    Save the BAM files from the Aligment step  - not done by default
 
     Trimming options
@@ -137,6 +136,8 @@ params.pico = false
 params.saveReference = false
 params.saveTrimmed = false
 //params.save
+params.skip_qc = false
+params.skip_fastqc = false
 
 // Check if genome exists in the config file
 if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
@@ -217,8 +218,8 @@ if( params.bed12 ){
 }
 if( params.aligner == 'hisat2' && params.splicesites ){
     Channel
-        .fromPath(params.bed12)
-        .ifEmpty { exit 1, "HISAT2 splice sites file not found: $alignment_splicesites" }
+        .fromPath(params.splicesites)
+        .ifEmpty { exit 1, "HISAT2 splice sites file not found: ${params.splicesites}" }
         .into { indexing_splicesites; alignment_splicesites }
 }
 if( workflow.profile == 'uppmax' || workflow.profile == 'uppmax-devel' ){
@@ -345,7 +346,7 @@ if(params.aligner == 'star' && !params.star_index && params.fasta){
     process makeSTARindex {
         label 'high_memory'
         tag "$fasta"
-        publishDir path: { params.saveReference ? "${params.outdir}/../REFERENCE/star_index" : params.outdir },
+        publishDir path: { params.saveReference ? "${params.outdir}/../REFERENCES/star_index" : params.outdir },
                    saveAs: { params.saveReference ? it : null }, mode: 'copy'
 
         input:
@@ -376,7 +377,7 @@ if(params.aligner == 'star' && !params.star_index && params.fasta){
 if(params.aligner == 'hisat2' && !params.splicesites){
     process makeHisatSplicesites {
         tag "$gtf"
-        publishDir path: { params.saveReference ? "${params.outdir}/../REFERENCE/hisat_index" : params.outdir },
+        publishDir path: { params.saveReference ? "${params.outdir}/../REFERENCES/hisat_index" : params.outdir },
                    saveAs: { params.saveReference ? it : null }, mode: 'copy'
 
         input:
@@ -397,7 +398,7 @@ if(params.aligner == 'hisat2' && !params.splicesites){
 if(params.aligner == 'hisat2' && !params.hisat2_index && params.fasta){
     process makeHISATindex {
         tag "$fasta"
-        publishDir path: { params.saveReference ? "${params.outdir}/../REFERENCE/hisat_index" : params.outdir },
+        publishDir path: { params.saveReference ? "${params.outdir}/../REFERENCES/hisat_index" : params.outdir },
                    saveAs: { params.saveReference ? it : null }, mode: 'copy'
 
         input:
@@ -461,7 +462,7 @@ if(params.gff){
 if(!params.bed12){
     process makeBED12 {
         tag "$gtf"
-        publishDir path: { params.saveReference ? "${params.outdir}/../REFERENCE/bed12" : params.outdir },
+        publishDir path: { params.saveReference ? "${params.outdir}/../REFERENCES/bed12" : params.outdir },
                    saveAs: { params.saveReference ? it : null }, mode: 'copy'
 
         input:
@@ -1111,9 +1112,10 @@ process multiqc {
     """
 }
 
+
 /*
  * STEP 13 - Output Description HTML
- */
+
 process output_documentation {
     publishDir "${params.outdir}/99-stats/pipeline_info", mode: 'copy'
 
@@ -1128,7 +1130,7 @@ process output_documentation {
     markdown_to_html.r $output_docs results_description.html
     """
 }
-
+ */
 
 workflow.onComplete {
     log.info "BU-ISCIII - Pipeline complete"
