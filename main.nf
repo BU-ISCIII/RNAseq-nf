@@ -348,6 +348,8 @@ if(params.aligner == 'star' && !params.star_index && params.fasta){
         tag "$fasta"
         publishDir path: { params.saveReference ? "${params.outdir}/../REFERENCES/star_index" : params.outdir },
                    saveAs: { params.saveReference ? it : null }, mode: 'copy'
+		cpus '20'
+		penv 'openmp'
 
         input:
         file fasta from ch_fasta_for_star_index
@@ -356,18 +358,18 @@ if(params.aligner == 'star' && !params.star_index && params.fasta){
         output:
         file "star" into star_index
 
-        script:
-        def avail_mem = task.memory ? "--limitGenomeGenerateRAM ${task.memory.toBytes() - 100000000}" : ''
+//        script:
+//        def avail_mem = task.memory ? "--limitGenomeGenerateRAM ${task.memory.toBytes() - 100000000}" : ''
 
         """
         mkdir star
         STAR \\
             --runMode genomeGenerate \\
-            --runThreadN ${task.cpus} \\
+            --runThreadN 20 \\
             --sjdbGTFfile $gtf \\
             --genomeDir star/ \\
             --genomeFastaFiles $fasta \\
-            $avail_mem
+//            $avail_mem
         """
     }
 }
@@ -400,6 +402,8 @@ if(params.aligner == 'hisat2' && !params.hisat2_index && params.fasta){
         tag "$fasta"
         publishDir path: { params.saveReference ? "${params.outdir}/../REFERENCES/hisat_index" : params.outdir },
                    saveAs: { params.saveReference ? it : null }, mode: 'copy'
+        cpus '20'
+		penv 'openmp'
 
         input:
         file fasta from ch_fasta_for_hisat_index
@@ -410,28 +414,13 @@ if(params.aligner == 'hisat2' && !params.hisat2_index && params.fasta){
         file "${fasta.baseName}.*.ht2*" into hs2_indices
 
         script:
-        if( !task.memory ){
-            log.info "[HISAT2 index build] Available memory not known - defaulting to 0. Specify process memory requirements to change this."
-            avail_mem = 0
-        } else {
-            log.info "[HISAT2 index build] Available memory: ${task.memory}"
-            avail_mem = task.memory.toGiga()
-        }
-        if( avail_mem > params.hisatBuildMemory ){
-            log.info "[HISAT2 index build] Over ${params.hisatBuildMemory} GB available, so using splice sites and exons in HISAT2 index"
-            extract_exons = "hisat2_extract_exons.py $gtf > ${gtf.baseName}.hisat2_exons.txt"
-            ss = "--ss $indexing_splicesites"
-            exon = "--exon ${gtf.baseName}.hisat2_exons.txt"
-        } else {
-            log.info "[HISAT2 index build] Less than ${params.hisatBuildMemory} GB available, so NOT using splice sites and exons in HISAT2 index."
-            log.info "[HISAT2 index build] Use --hisatBuildMemory [small number] to skip this check."
-            extract_exons = ''
-            ss = ''
-            exon = ''
-        }
+        log.info "[HISAT2 index build] Over ${params.hisatBuildMemory} GB available, so using splice sites and exons in HISAT2 index"
+        extract_exons = "hisat2_extract_exons.py $gtf > ${gtf.baseName}.hisat2_exons.txt"
+        ss = "--ss $indexing_splicesites"
+
         """
         $extract_exons
-        hisat2-build -p ${task.cpus} $ss $exon $fasta ${fasta.baseName}.hisat2_index
+        hisat2-build -p 20 $ss $exon $fasta ${fasta.baseName}.hisat2_index
         """
     }
 }
@@ -531,7 +520,7 @@ process trimming {
     script:
     prefix = name - ~/(_S[0-9]{2})?(_L00[1-9])?(.R1)?(_1)?(_R1)?(_trimmed)?(_val_1)?(_00*)?(\.fq)?(\.fastq)?(\.gz)?$/
     """
-    trimmomatic PE -phred33 $reads -threads 1 $prefix"_filtered_R1.fastq" $prefix"_unpaired_R1.fastq" $prefix"_filtered_R2.fastq" $prefix"_unpaired_R2.fastq" ILLUMINACLIP:${params.trimmomatic_adapters_file}:${params.trimmomatic_adapters_parameters} SLIDINGWINDOW:${params.trimmomatic_window_length}:${params.trimmomatic_window_value} MINLEN:${params.trimmomatic_mininum_length} 2> ${name}.log
+    java -jar $TRIMMOMATIC_PATH/trimmomatic-0.33.jar PE -phred33 $reads -threads 1 $prefix"_filtered_R1.fastq" $prefix"_unpaired_R1.fastq" $prefix"_filtered_R2.fastq" $prefix"_unpaired_R2.fastq" ILLUMINACLIP:${params.trimmomatic_adapters_file}:${params.trimmomatic_adapters_parameters} SLIDINGWINDOW:${params.trimmomatic_window_length}:${params.trimmomatic_window_value} MINLEN:${params.trimmomatic_mininum_length} 2> ${name}.log
     gzip *.fastq
     fastqc -q *_filtered_*.fastq.gz
     """
@@ -573,7 +562,9 @@ if(params.aligner == 'star'){
                 else if (params.saveAlignedIntermediates && filename != "where_are_my_files.txt") filename
                 else null
             }
-
+        cpus '20'
+		penv 'openmp'
+		
         input:
         file reads from trimmed_reads
         file index from star_index.collect()
@@ -590,20 +581,22 @@ if(params.aligner == 'star'){
 
         script:
         prefix = reads[0].toString() - ~/(_R1)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
-        def star_mem = task.memory ?: params.star_memory ?: false
-        def avail_mem = star_mem ? "--limitBAMsortRAM ${star_mem.toBytes() - 100000000}" : ''
-        seqCenter = params.seqCenter ? "--outSAMattrRGline ID:$prefix 'CN:$params.seqCenter'" : ''
+//        def star_mem = task.memory ?: params.star_memory ?: false
+//        def avail_mem = star_mem ? "--limitBAMsortRAM ${star_mem.toBytes() - 100000000}" : ''
+//        seqCenter = params.seqCenter ? "--outSAMattrRGline ID:$prefix 'CN:$params.seqCenter'" : ''
         """
         STAR --genomeDir $index \\
             --sjdbGTFfile $gtf \\
             --readFilesIn $reads  \\
-            --runThreadN ${task.cpus} \\
+            --runThreadN 20 \\
             --twopassMode Basic \\
             --outWigType bedGraph \\
-            --outSAMtype BAM SortedByCoordinate $avail_mem \\
+            --outSAMtype BAM \\
+//            --outSAMtype BAM SortedByCoordinate $avail_mem \\
             --readFilesCommand zcat \\
             --runDirPerm All_RWX \\
-             --outFileNamePrefix $prefix $seqCenter
+             --outFileNamePrefix $prefix
+//             --outFileNamePrefix $prefix $seqCenter
 
         samtools index ${prefix}Aligned.sortedByCoord.out.bam
         """
@@ -631,6 +624,8 @@ if(params.aligner == 'hisat2'){
                 else if (params.saveAlignedIntermediates && filename != "where_are_my_files.txt") filename
                 else null
             }
+        cpus '20'
+		penv 'openmp'
 
         input:
         file reads from trimmed_reads
@@ -646,7 +641,7 @@ if(params.aligner == 'hisat2'){
         script:
         index_base = hs2_indices[0].toString() - ~/.\d.ht2l?/
         prefix = reads[0].toString() - ~/(_R1)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
-        seqCenter = params.seqCenter ? "--rg-id ${prefix} --rg CN:${params.seqCenter.replaceAll('\\s','_')}" : ''
+//        seqCenter = params.seqCenter ? "--rg-id ${prefix} --rg CN:${params.seqCenter.replaceAll('\\s','_')}" : ''
         def rnastrandness = ''
         if (forward_stranded && !unstranded){
             rnastrandness = params.singleEnd ? '--rna-strandness F' : '--rna-strandness FR'
@@ -659,10 +654,11 @@ if(params.aligner == 'hisat2'){
                    -U $reads \\
                    $rnastrandness \\
                    --known-splicesite-infile $alignment_splicesites \\
-                   -p ${task.cpus} \\
+                   -p 20 \\
                    --met-stderr \\
                    --new-summary \\
-                   --summary-file ${prefix}.hisat2_summary.txt $seqCenter \\
+                   --summary-file ${prefix}.hisat2_summary.txt \\
+//                   --summary-file ${prefix}.hisat2_summary.txt $seqCenter \\
                    | samtools view -bS -F 4 -F 256 - > ${prefix}.bam
             """
         } else {
@@ -674,10 +670,11 @@ if(params.aligner == 'hisat2'){
                    --known-splicesite-infile $alignment_splicesites \\
                    --no-mixed \\
                    --no-discordant \\
-                   -p ${task.cpus} \\
+                   -p 20 \\
                    --met-stderr \\
                    --new-summary \\
-                   --summary-file ${prefix}.hisat2_summary.txt $seqCenter \\
+                   --summary-file ${prefix}.hisat2_summary.txt \\
+//                   --summary-file ${prefix}.hisat2_summary.txt $seqCenter \\
                    | samtools view -bS -F 4 -F 8 -F 256 - > ${prefix}.bam
             """
         }
@@ -692,6 +689,8 @@ if(params.aligner == 'hisat2'){
                 else if (params.saveAlignedIntermediates && filename != "where_are_my_files.txt") "aligned_sorted/$filename"
                 else null
             }
+        cpus '20'
+		pènv 'openmp'
 
         input:
         file hisat2_bam
@@ -703,12 +702,12 @@ if(params.aligner == 'hisat2'){
         file "where_are_my_files.txt"
 
         script:
-        def suff_mem = ("${(task.memory.toBytes() - 6000000000) / task.cpus}" > 2000000000) ? 'true' : 'false'
-        def avail_mem = (task.memory && suff_mem) ? "-m" + "${(task.memory.toBytes() - 6000000000) / task.cpus}" : ''
+        def suff_mem = ("${(task.memory.toBytes() - 6000000000) / 20}" > 2000000000) ? 'true' : 'false'
+        def avail_mem = (task.memory && suff_mem) ? "-m" + "${(task.memory.toBytes() - 6000000000) / 20}" : ''
         """
         samtools sort \\
             $hisat2_bam \\
-            -@ ${task.cpus} ${avail_mem} \\
+            -@ 20 ${avail_mem} \\
             -o ${hisat2_bam.baseName}.sorted.bam
         samtools index ${hisat2_bam.baseName}.sorted.bam
         """
@@ -907,6 +906,8 @@ process dupradar {
             else if (filename.indexOf("_intercept_slope.txt") > 0) "intercepts_slopes/$filename"
             else "$filename"
         }
+    cpus '20'
+	penv 'openmp'
 
     when:
     !params.skip_qc && !params.skip_dupradar
@@ -927,7 +928,7 @@ process dupradar {
     }
     def paired = params.singleEnd ? 'single' :  'paired'
     """
-    dupRadar.r $bam_md $gtf $dupradar_direction $paired ${task.cpus}
+    dupRadar.r $bam_md $gtf $dupradar_direction $paired 20
     """
 }
 
