@@ -126,7 +126,6 @@ if (params.help){
 }
 
 params.genomes = false
-params.genomes =false
 params.forward_stranded = false
 params.reverse_stranded = false
 params.unstranded = false
