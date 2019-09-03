@@ -579,7 +579,7 @@ if(params.aligner == 'star'){
         file "*.out" into alignment_logs
         file "*SJ.out.tab"
         file "*Log.out" into star_log
-        file "where_are_my_files.txt"
+//        file "where_are_my_files.txt"
         file "${prefix}Aligned.sortedByCoord.out.bam.bai" into bam_index_rseqc, bam_index_genebody
 
         script:
@@ -875,10 +875,10 @@ process markDuplicates {
     file "${bam.baseName}.markDups.bam.bai"
 
     script:
-    markdup_java_options = (task.memory.toGiga() > 8) ? ${params.markdup_java_options} : "\"-Xms" +  (task.memory.toGiga() / 2 )+"g "+ "-Xmx" + (task.memory.toGiga() - 1)+ "g\""
+//    markdup_java_options = (task.memory.toGiga() > 8) ? ${params.markdup_java_options} : "\"-Xms" +  (task.memory.toGiga() / 2 )+"g "+ "-Xmx" + (task.memory.toGiga() - 1)+ "g\""
 
     """
-    picard ${markdup_java_options} MarkDuplicates \\
+    picard MarkDuplicates \\
         INPUT=$bam \\
         OUTPUT=${bam.baseName}.markDups.bam \\
         METRICS_FILE=${bam.baseName}.markDups_metrics.txt \\
