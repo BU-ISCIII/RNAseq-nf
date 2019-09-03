@@ -17,3 +17,6 @@ results2/
 ## Oter
 .DS_Store
 *.pyc
+
+##Executables
+nextflow
