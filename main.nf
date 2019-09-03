@@ -126,6 +126,7 @@ if (params.help){
 }
 
 params.genome = false
+params.genomes = false
 params.help = false
 params.readPaths = false
 params.forward_stranded = false
@@ -359,8 +360,9 @@ if(params.aligner == 'star' && !params.star_index && params.fasta){
         output:
         file "star" into star_index
 
-//        script:
-//        def avail_mem = task.memory ? "--limitGenomeGenerateRAM ${task.memory.toBytes() - 100000000}" : ''
+
+        script:
+        def avail_mem = task.memory ? "--limitGenomeGenerateRAM ${task.memory.toBytes() - 100000000}" : ''
 
         """
         mkdir star
@@ -370,7 +372,7 @@ if(params.aligner == 'star' && !params.star_index && params.fasta){
             --sjdbGTFfile $gtf \\
             --genomeDir star/ \\
             --genomeFastaFiles $fasta \\
-//            $avail_mem
+            $avail_mem
         """
     }
 }
@@ -521,7 +523,7 @@ process trimming {
     script:
     prefix = name - ~/(_S[0-9]{2})?(_L00[1-9])?(.R1)?(_1)?(_R1)?(_trimmed)?(_val_1)?(_00*)?(\.fq)?(\.fastq)?(\.gz)?$/
     """
-    java -jar $TRIMMOMATIC_PATH/trimmomatic-0.33.jar PE -phred33 $reads -threads 1 $prefix"_filtered_R1.fastq" $prefix"_unpaired_R1.fastq" $prefix"_filtered_R2.fastq" $prefix"_unpaired_R2.fastq" ILLUMINACLIP:${params.trimmomatic_adapters_file}:${params.trimmomatic_adapters_parameters} SLIDINGWINDOW:${params.trimmomatic_window_length}:${params.trimmomatic_window_value} MINLEN:${params.trimmomatic_mininum_length} 2> ${name}.log
+    java -jar $TRIMMOMATIC_PATH/trimmomatic-0.33.jar PE -threads 1 -phred33 $reads $prefix"_filtered_R1.fastq" $prefix"_unpaired_R1.fastq" $prefix"_filtered_R2.fastq" $prefix"_unpaired_R2.fastq" ILLUMINACLIP:${params.trimmomatic_adapters_file}:${params.trimmomatic_adapters_parameters} SLIDINGWINDOW:${params.trimmomatic_window_length}:${params.trimmomatic_window_value} MINLEN:${params.trimmomatic_mininum_length} 2> ${name}.log
     gzip *.fastq
     fastqc -q *_filtered_*.fastq.gz
     """
@@ -582,9 +584,9 @@ if(params.aligner == 'star'){
 
         script:
         prefix = reads[0].toString() - ~/(_R1)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
-//        def star_mem = task.memory ?: params.star_memory ?: false
-//        def avail_mem = star_mem ? "--limitBAMsortRAM ${star_mem.toBytes() - 100000000}" : ''
-//        seqCenter = params.seqCenter ? "--outSAMattrRGline ID:$prefix 'CN:$params.seqCenter'" : ''
+        def star_mem = task.memory ?: params.star_memory ?: false
+        def avail_mem = star_mem ? "--limitBAMsortRAM ${star_mem.toBytes() - 100000000}" : ''
+        seqCenter = params.seqCenter ? "--outSAMattrRGline ID:$prefix 'CN:$params.seqCenter'" : ''
         """
         STAR --genomeDir $index \\
             --sjdbGTFfile $gtf \\
@@ -592,12 +594,10 @@ if(params.aligner == 'star'){
             --runThreadN 20 \\
             --twopassMode Basic \\
             --outWigType bedGraph \\
-            --outSAMtype BAM \\
-//            --outSAMtype BAM SortedByCoordinate $avail_mem \\
+            --outSAMtype BAM SortedByCoordinate $avail_mem \\
             --readFilesCommand zcat \\
             --runDirPerm All_RWX \\
-             --outFileNamePrefix $prefix
-//             --outFileNamePrefix $prefix $seqCenter
+            --outFileNamePrefix $prefix $seqCenter
 
         samtools index ${prefix}Aligned.sortedByCoord.out.bam
         """
@@ -659,7 +659,7 @@ if(params.aligner == 'hisat2'){
                    --met-stderr \\
                    --new-summary \\
                    --summary-file ${prefix}.hisat2_summary.txt \\
-//                   --summary-file ${prefix}.hisat2_summary.txt $seqCenter \\
+#                   --summary-file ${prefix}.hisat2_summary.txt $seqCenter \\
                    | samtools view -bS -F 4 -F 256 - > ${prefix}.bam
             """
         } else {
@@ -675,7 +675,7 @@ if(params.aligner == 'hisat2'){
                    --met-stderr \\
                    --new-summary \\
                    --summary-file ${prefix}.hisat2_summary.txt \\
-//                   --summary-file ${prefix}.hisat2_summary.txt $seqCenter \\
+#                   --summary-file ${prefix}.hisat2_summary.txt $seqCenter \\
                    | samtools view -bS -F 4 -F 8 -F 256 - > ${prefix}.bam
             """
         }
