@@ -159,8 +159,8 @@ params.hisat2_index = params.genome ? params.genomes[ params.genome ].hisat2 ?: 
 ch_mdsplot_header = Channel.fromPath("$baseDir/assets/mdsplot_header.txt")
 ch_heatmap_header = Channel.fromPath("$baseDir/assets/heatmap_header.txt")
 ch_biotypes_header = Channel.fromPath("$baseDir/assets/biotypes_header.txt")
-//Channel.fromPath("$baseDir/assets/where_are_my_files.txt")
-//       .into{ch_where_trim_galore; ch_where_star; ch_where_hisat2; ch_where_hisat2_sort}
+Channel.fromPath("$baseDir/assets/where_are_my_files.txt")
+       .into{ch_where_trim_galore; ch_where_star; ch_where_hisat2; ch_where_hisat2_sort}
 
 // Trimming default
 params.notrim = false
@@ -511,7 +511,7 @@ process trimming {
 
     input:
     set val(name), file(reads) from raw_reads_trimming
-//    file wherearemyfiles from ch_where_trim_galore.collect()
+    file wherearemyfiles from ch_where_trim_galore.collect()
 
     output:
     file '*_filtered_*.fastq.gz' into trimmed_reads,trimmed_paired_reads,trimmed_paired_reads_bwa
@@ -572,14 +572,14 @@ if(params.aligner == 'star'){
         file reads from trimmed_reads
         file index from star_index.collect()
         file gtf from gtf_star.collect()
-//        file wherearemyfiles from ch_where_star.collect()
+        file wherearemyfiles from ch_where_star.collect()
 
         output:
         set file("*Log.final.out"), file ('*.bam') into star_aligned
         file "*.out" into alignment_logs
         file "*SJ.out.tab"
         file "*Log.out" into star_log
-//        file "where_are_my_files.txt"
+        file "where_are_my_files.txt"
         file "${prefix}Aligned.sortedByCoord.out.bam.bai" into bam_index_rseqc, bam_index_genebody
 
         script:
@@ -632,7 +632,7 @@ if(params.aligner == 'hisat2'){
         file reads from trimmed_reads
         file hs2_indices from hs2_indices.collect()
         file alignment_splicesites from alignment_splicesites.collect()
-//        file wherearemyfiles from ch_where_hisat2.collect()
+        file wherearemyfiles from ch_where_hisat2.collect()
 
         output:
         file "${prefix}.bam" into hisat2_bam
@@ -695,7 +695,7 @@ if(params.aligner == 'hisat2'){
 
         input:
         file hisat2_bam
-//        file wherearemyfiles from ch_where_hisat2_sort.collect()
+        file wherearemyfiles from ch_where_hisat2_sort.collect()
 
         output:
         file "${hisat2_bam.baseName}.sorted.bam" into bam_count, bam_rseqc, bam_preseq, bam_markduplicates, bam_featurecounts, bam_stringtieFPKM,bam_forSubsamp, bam_skipSubsamp
