@@ -137,9 +137,10 @@ params.singleEnd = false
 params.pico = false
 params.saveReference = false
 params.saveTrimmed = false
-//params.save
 params.skip_qc = false
 params.skip_fastqc = false
+params.skip_dupradar = false
+
 
 // Check if genome exists in the config file
 if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
@@ -643,6 +644,8 @@ if(params.aligner == 'hisat2'){
         index_base = hs2_indices[0].toString() - ~/.\d.ht2l?/
         prefix = reads[0].toString() - ~/(_R1)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
 //        seqCenter = params.seqCenter ? "--rg-id ${prefix} --rg CN:${params.seqCenter.replaceAll('\\s','_')}" : ''
+//                   --summary-file ${prefix}.hisat2_summary.txt $seqCenter \\
+//                   --summary-file ${prefix}.hisat2_summary.txt $seqCenter \\
         def rnastrandness = ''
         if (forward_stranded && !unstranded){
             rnastrandness = params.singleEnd ? '--rna-strandness F' : '--rna-strandness FR'
@@ -659,7 +662,6 @@ if(params.aligner == 'hisat2'){
                    --met-stderr \\
                    --new-summary \\
                    --summary-file ${prefix}.hisat2_summary.txt \\
-#                   --summary-file ${prefix}.hisat2_summary.txt $seqCenter \\
                    | samtools view -bS -F 4 -F 256 - > ${prefix}.bam
             """
         } else {
@@ -675,7 +677,6 @@ if(params.aligner == 'hisat2'){
                    --met-stderr \\
                    --new-summary \\
                    --summary-file ${prefix}.hisat2_summary.txt \\
-#                   --summary-file ${prefix}.hisat2_summary.txt $seqCenter \\
                    | samtools view -bS -F 4 -F 8 -F 256 - > ${prefix}.bam
             """
         }
@@ -772,7 +773,7 @@ process rseqc {
 
 /*
  * Step 4.1 Subsample the BAM files if necessary
- */
+
 bam_forSubsamp
     .filter { it.size() > params.subsampFilesizeThreshold }
     .map { [it, params.subsampFilesizeThreshold / it.size() ] }
@@ -795,6 +796,7 @@ process bam_subsample {
     samtools view -s $fraction -b $bam | samtools sort -o ${bam.baseName}_subsamp.bam
     """
 }
+ */
 
 /*
  * Step 4.2 Rseqc genebody_coverage
@@ -815,7 +817,7 @@ process genebody_coverage {
     !params.skip_qc && !params.skip_genebody_coverage
 
     input:
-    file bam from bam_subsampled.concat(bam_skipSubsampFiltered)
+    file bam from bam_forSubsamp
     file bed12 from bed_genebody_coverage.collect()
 
     output:
