@@ -140,8 +140,9 @@ params.saveTrimmed = false
 params.skip_qc = false
 params.skip_fastqc = false
 params.skip_dupradar = false
-fcGroupFeatures = 'gene_id'
-fcGroupFeaturesType = 'gene_biotype'
+params.fcGroupFeatures = 'gene_name'
+params.fcGroupFeaturesType = 'gene_name'
+//params.fcExtraAttributes = 'gene_id'
 
 // Check if genome exists in the config file
 if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
