@@ -769,6 +769,7 @@ process rseqc {
     """
     infer_experiment.py -i $bam_rseqc -r $bed12 > ${bam_rseqc.baseName}.infer_experiment.txt
     if (params.singleEnd) {
+        clipping_profile.py -i $bam_rseqc -s "SE" -o ${bam_rseqc.baseName}.clipping_profile
     } else {
         clipping_profile.py -i $bam_rseqc -s "PE" -o ${bam_rseqc.baseName}.clipping_profile
     }
