@@ -728,6 +728,10 @@ process rseqc {
         saveAs: {filename ->
                  if (filename.indexOf("bam_stat.txt") > 0)                      "bam_stat/$filename"
             else if (filename.indexOf("infer_experiment.txt") > 0)              "infer_experiment/$filename"
+            else if (filename.indexOf("clipping_profile.r") > 0)                "clipping_profile/data/$filename"
+            else if (filename.indexOf("clipping_profile.xls") > 0)              "clipping_profile/data/$filename"
+            else if (filename.indexOf("clipping_profile.R1.pdf") > 0)           "clipping_profile/plots/$filename"
+            else if (filename.indexOf("clipping_profile.R1.pdf") > 0)           "clipping_profile/plots/$filename"
             else if (filename.indexOf("read_distribution.txt") > 0)             "read_distribution/$filename"
             else if (filename.indexOf("read_duplication.DupRate_plot.pdf") > 0) "read_duplication/$filename"
             else if (filename.indexOf("read_duplication.DupRate_plot.r") > 0)   "read_duplication/rscripts/$filename"
@@ -764,6 +768,10 @@ process rseqc {
     script:
     """
     infer_experiment.py -i $bam_rseqc -r $bed12 > ${bam_rseqc.baseName}.infer_experiment.txt
+    if (params.singleEnd) {
+    } else {
+        clipping_profile.py -i $bam_rseqc -s "PE" -o ${bam_rseqc.baseName}.clipping_profile
+    }
     junction_annotation.py -i $bam_rseqc -o ${bam_rseqc.baseName}.rseqc -r $bed12
     bam_stat.py -i $bam_rseqc 2> ${bam_rseqc.baseName}.bam_stat.txt
     junction_saturation.py -i $bam_rseqc -o ${bam_rseqc.baseName}.rseqc -r $bed12 2> ${bam_rseqc.baseName}.junction_annotation_log.txt
