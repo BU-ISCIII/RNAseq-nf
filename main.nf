@@ -561,7 +561,7 @@ if(params.aligner == 'star'){
     process star {
         label 'high_memory'
         tag "$prefix"
-        publishDir "${params.outdir}/04-alignment", mode: 'copy',
+        publishDir "${params.outdir}/03-alignment", mode: 'copy',
             saveAs: {filename ->
                 if (filename.indexOf(".bam") == -1) "logs/$filename"
                 else if (!params.saveAlignedIntermediates && filename == "where_are_my_files.txt") filename
@@ -621,7 +621,7 @@ if(params.aligner == 'hisat2'){
     process hisat2Align {
         label 'high_memory'
         tag "$prefix"
-        publishDir "${params.outdir}/04-alignment", mode: 'copy',
+        publishDir "${params.outdir}/03-alignment", mode: 'copy',
             saveAs: {filename ->
                 if (filename.indexOf(".hisat2_summary.txt") > 0) "logs/$filename"
                 else if (!params.saveAlignedIntermediates && filename == "where_are_my_files.txt") filename
@@ -724,7 +724,7 @@ if(params.aligner == 'hisat2'){
 process rseqc {
     label 'mid_memory'
     tag "${bam_rseqc.baseName - '.sorted'}"
-    publishDir "${params.outdir}/05-rseqc" , mode: 'copy',
+    publishDir "${params.outdir}/04-rseqc" , mode: 'copy',
         saveAs: {filename ->
                  if (filename.indexOf("bam_stat.txt") > 0)                      "bam_stat/$filename"
             else if (filename.indexOf("infer_experiment.txt") > 0)              "infer_experiment/$filename"
@@ -815,7 +815,7 @@ process bam_subsample {
 process genebody_coverage {
     label 'mid_memory'
     tag "${bam.baseName - '.sorted'}"
-       publishDir "${params.outdir}/05-rseqc" , mode: 'copy',
+       publishDir "${params.outdir}/04-rseqc" , mode: 'copy',
         saveAs: {filename ->
             if (filename.indexOf("geneBodyCoverage.curves.pdf") > 0)       "geneBodyCoverage/$filename"
             else if (filename.indexOf("geneBodyCoverage.r") > 0)           "geneBodyCoverage/rscripts/$filename"
@@ -850,7 +850,7 @@ process genebody_coverage {
  */
 process preseq {
     tag "${bam_preseq.baseName - '.sorted'}"
-    publishDir "${params.outdir}/06-preseq", mode: 'copy'
+    publishDir "${params.outdir}/05-preseq", mode: 'copy'
 
     when:
     !params.skip_qc && !params.skip_preseq
@@ -873,7 +873,7 @@ process preseq {
  */
 process markDuplicates {
     tag "${bam.baseName - '.sorted'}"
-    publishDir "${params.outdir}/07-removeDuplicates", mode: 'copy',
+    publishDir "${params.outdir}/06-removeDuplicates", mode: 'copy',
         saveAs: {filename -> filename.indexOf("_metrics.txt") > 0 ? "metrics/$filename" : "$filename"}
 
     when:
@@ -910,7 +910,7 @@ process markDuplicates {
 process dupradar {
     label 'low_memory'
     tag "${bam_md.baseName - '.sorted.markDups'}"
-    publishDir "${params.outdir}/07-removeDuplicates", mode: 'copy',
+    publishDir "${params.outdir}/06-removeDuplicates", mode: 'copy',
         saveAs: {filename ->
             if (filename.indexOf("_duprateExpDens.pdf") > 0) "scatter_plots/$filename"
             else if (filename.indexOf("_duprateExpBoxplot.pdf") > 0) "box_plots/$filename"
@@ -953,7 +953,7 @@ process dupradar {
 process featureCounts {
     label 'low_memory'
     tag "${bam_featurecounts.baseName - '.sorted'}"
-    publishDir "${params.outdir}/08-featureCounts", mode: 'copy',
+    publishDir "${params.outdir}/07-featureCounts", mode: 'copy',
         saveAs: {filename ->
             if (filename.indexOf("biotype_counts") > 0) "biotype_counts/$filename"
             else if (filename.indexOf("_gene.featureCounts.txt.summary") > 0) "gene_count_summaries/$filename"
@@ -994,7 +994,7 @@ process featureCounts {
  */
 process merge_featureCounts {
     tag "${input_files[0].baseName - '.sorted'}"
-    publishDir "${params.outdir}/08-featureCounts", mode: 'copy'
+    publishDir "${params.outdir}/07-featureCounts", mode: 'copy'
 
     input:
     file input_files from featureCounts_to_merge.collect()
@@ -1017,7 +1017,7 @@ process merge_featureCounts {
  */
 process stringtieFPKM {
     tag "${bam_stringtieFPKM.baseName - '.sorted'}"
-    publishDir "${params.outdir}/09-stringtieFPKM", mode: 'copy',
+    publishDir "${params.outdir}/08-stringtieFPKM", mode: 'copy',
         saveAs: {filename ->
             if (filename.indexOf("transcripts.gtf") > 0) "transcripts/$filename"
             else if (filename.indexOf("cov_refs.gtf") > 0) "cov_refs/$filename"
@@ -1062,7 +1062,7 @@ process stringtieFPKM {
 process sample_correlation {
     label 'low_memory'
     tag "${input_files[0].toString() - '.sorted_gene.featureCounts.txt' - 'Aligned'}"
-    publishDir "${params.outdir}/10-sample_correlation", mode: 'copy'
+    publishDir "${params.outdir}/09-sample_correlation", mode: 'copy'
 
     when:
     !params.skip_qc && !params.skip_edger
