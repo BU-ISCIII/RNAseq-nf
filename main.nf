@@ -88,7 +88,7 @@ def helpMessage() {
       --pico                        Sets trimming and standedness settings for the SMARTer Stranded Total RNA-Seq Kit - Pico Input kit. Equivalent to: --forward_stranded --clip_r1 3 --three_prime_clip_r2 3
       --fcExtraAttributes           Define which extra parameters should also be included in featureCounts (default: gene_names)
       --fcGroupFeatures             Define the attribute type used to group features. (default: 'gene_name')
-      --fcGroupFeaturesType         Define the type attribute used to group features based on the group attribute (default: 'gene_biotype')
+      --fcGroupFeaturesType         Define the type attribute used to group features based on the group attribute (default: 'gene_name')
 
     Other options:
       --outdir                      The output directory where the results will be saved
@@ -1121,7 +1121,7 @@ process multiqc {
 
 /*
  * STEP 13 - Output Description HTML
-
+ */
 process output_documentation {
     publishDir "${params.outdir}/99-stats/pipeline_info", mode: 'copy'
 
@@ -1136,7 +1136,7 @@ process output_documentation {
     markdown_to_html.r $output_docs results_description.html
     """
 }
- */
+
 
 workflow.onComplete {
     log.info "BU-ISCIII - Pipeline complete"
