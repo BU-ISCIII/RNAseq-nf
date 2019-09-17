@@ -64,6 +64,9 @@ def helpMessage() {
       --forward_stranded            The library is forward stranded
       --reverse_stranded            The library is reverse stranded
       --unstranded                  The default behaviour
+    Aligner:
+      --'star'                      Use STAR for RNA alignment. (Default)
+      --'hisat2'                    Use HISAT2 for RNA alignment.
 
     References                      If not specified in the configuration file or you wish to overwrite any of the references.
       --star_index                  Path to STAR index
@@ -142,6 +145,7 @@ params.skip_fastqc = false
 params.skip_dupradar = false
 params.fcGroupFeatures = 'gene_name'
 params.fcGroupFeaturesType = 'gene_name'
+params.aligner = 'star'
 //params.fcExtraAttributes = 'gene_id'
 
 // Check if genome exists in the config file
