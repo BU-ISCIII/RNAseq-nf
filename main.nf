@@ -65,8 +65,7 @@ def helpMessage() {
       --reverse_stranded            The library is reverse stranded
       --unstranded                  The default behaviour
     Aligner:
-      --'star'                      Use STAR for RNA alignment. (Default)
-      --'hisat2'                    Use HISAT2 for RNA alignment.
+      --aligner                     Choose aligner for RNA data between 'star' or 'hisat2'. By default STAR aligner.
 
     References                      If not specified in the configuration file or you wish to overwrite any of the references.
       --star_index                  Path to STAR index
