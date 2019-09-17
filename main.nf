@@ -145,7 +145,15 @@ params.skip_dupradar = false
 params.fcGroupFeatures = 'gene_name'
 params.fcGroupFeaturesType = 'gene_name'
 params.aligner = 'star'
-//params.fcExtraAttributes = 'gene_id'
+params.fcExtraAttributes = 'gene_name'
+params.seqCenter = false
+params.skip_qc = false
+params.skip_fastqc = false
+params.skip_genebody_coverage = false
+params.skip_preseq = false
+params.skip_dupradar = false
+params.skip_edger = false
+params.skip_multiqc = false
 
 // Check if genome exists in the config file
 if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
@@ -573,7 +581,7 @@ if(params.aligner == 'star'){
             }
         cpus '20'
 		penv 'openmp'
-		
+
         input:
         file reads from trimmed_reads
         file index from star_index.collect()
