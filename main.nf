@@ -65,7 +65,7 @@ def helpMessage() {
     Strandedness:
       --forward_stranded            The library is forward stranded
       --reverse_stranded            The library is reverse stranded
-      --unstranded                  The default behaviour
+      --unstranded                  The default behavior
 
     Aligner:
       --aligner                     Choose aligner for RNA data between 'star' or 'hisat2'. By default STAR aligner.
@@ -78,7 +78,7 @@ def helpMessage() {
       --gff                         Path to GFF3 file
       --bed12                       Path to bed12 file
       --saveReference               Save the generated reference files the the Results directory.
-      --saveAlignedIntermediates    Save the BAM files from the Aligment step  - not done by default
+      --saveAlignedIntermediates    Save the BAM files from the Alignment step  - not done by default
 
     Trimming options
       --notrim                      Specifying --notrim will skip the adapter trimming step.
@@ -86,7 +86,7 @@ def helpMessage() {
       --trimmomatic_adapters_file   Adapters index for adapter removal
       --trimmomatic_adapters_parameters Trimming parameters for adapters. <seed mismatches>:<palindrome clip threshold>:<simple clip threshold>. Default 2:30:10
       --trimmomatic_window_length   Window size. Default 4
-      --trimmomatic_window_value    Window average quality requiered. Default 20
+      --trimmomatic_window_value    Window average quality required. Default 20
       --trimmomatic_mininum_length  Minimum length of reads
 
     Presets:
