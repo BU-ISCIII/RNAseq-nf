@@ -12,32 +12,33 @@
 ----------------------------------------------------------------------------------------
 Pipeline overview:
  - 1. : Preprocessing
-     - 1.1: Build STAR index
-	 - 1.2: Build HISAT2 splice sites file
-	 - 1.3: Build HISAT2 index
-	 - 1.4: Convert GFF3 to GTF
-	 - 1.5: Build BED12 file
-	 - 1.6: FastQC for raw sequencing reads quality control
-     - 1.2: Trimmomatic
+   - 1.1: Build aligner index
+     - 1.1.1: Build STAR index
+	   - 1.1.2: Build HISAT2 splice sites file
+	   - 1.1.3: Build HISAT2 index
+	 - 1.2: Convert GFF3 to GTF
+	 - 1.3: Build BED12 file
+	 - 1.4: FastQC for raw sequencing reads quality control
+   - 1.5: Trimmomatic
  - 2. : Alignment
-     - 2.1: Align with STAR
+   - 2.1: Align with STAR
 	 - 2.2: Align with HISAT2
 	 - 2.3: preseq analysis
  - 3. : Remove duplicates
 	 - 3.1: Mark duplicates
 	 - 3.2: dupRadar
  - 4. : Feature counts
-     - 4.1: Feature counts
+   - 4.1: Feature counts
 	 - 4.2: Merge feature counts
  - 5. : Assembly
-     - 5.1: stringtie FPKM
+   - 5.1: stringtie FPKM
  - 6. : Differential expression
-     - 6.1: edgeR
+   - 6.1: edgeR
 	 - 6.2: DESeq2
  - 7. : Quality control
-     - 7.1: RSeQC analysis
+   - 7.1: RSeQC analysis
  - 8. : Stats
-     - 8.1 : MultiQC
+   - 8.1 : MultiQC
  - 9. : Output Description HTML
  ----------------------------------------------------------------------------------------
 
@@ -60,10 +61,12 @@ def helpMessage() {
     Options:
       --genome                      Name of iGenomes reference
       --singleEnd                   Specifies that the input is single end reads
+
     Strandedness:
       --forward_stranded            The library is forward stranded
       --reverse_stranded            The library is reverse stranded
       --unstranded                  The default behaviour
+
     Aligner:
       --aligner                     Choose aligner for RNA data between 'star' or 'hisat2'. By default STAR aligner.
 
