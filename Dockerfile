@@ -11,13 +11,6 @@ RUN echo "Install basic development tools" && \
     echo "Installing SCI-F" && \
     pip install scif ipython
 
-RUN echo "Install miniconda"
-    curl -fsSL https://repo.continuum.io/miniconda/Miniconda3-4.6.14-Linux-x86_64.sh -o miniconda_v4.6.14.sh
-  	bash miniconda_v4.6.14.sh -b -p /opt/miniconda
-  	conda init; conda config --append channels conda-forge; conda config --add channels defaults; conda config --add channels bioconda
-
-ENV PATH=$PATH:/opt/miniconda/bin/conda/bin
-
 RUN echo "Installing trimmomatic app" && \
     scif install /opt/scif_app_recipes/trimmomatic_v0.38_centos7.scif && \
 
