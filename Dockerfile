@@ -11,12 +11,55 @@ RUN echo "Install basic development tools" && \
     echo "Installing SCI-F" && \
     pip install scif ipython
 
-RUN echo "Installing trimmomatic app" && \
-    scif install /opt/scif_app_recipes/trimmomatic_v0.38_centos7.scif && \
+RUN echo "Install miniconda"
+    curl -fsSL https://repo.continuum.io/miniconda/Miniconda3-4.6.14-Linux-x86_64.sh -o miniconda_v4.6.14.sh
+	bash miniconda_v4.6.14.sh -b -p /opt/miniconda
+	conda init; conda config --append channels conda-forge; conda config --add channels defaults; conda config --add channels bioconda
 
-COPY environment.yml /
-RUN conda env create -f /environment.yml && conda clean -a
-ENV PATH /opt/conda/envs/nf-core-rnaseq-1.3/bin:$PATH
+ENV PATH=$PATH:/opt/miniconda/bin/conda/bin
+
+RUN echo "Installing FastQC app" && \
+    scif install /opt/scif_app_recipes/fastqc_v0.11.7_centos7.scif && \
+    echo "Installing trimmomatic app" && \
+    scif install /opt/scif_app_recipes/trimmomatic_v0.38_centos7.scif && \
+    echo "Installing STAR app" && \
+    scif install /opt/scif_app_recipes/STAR_v2.6.1d_centos7.scif && \
+    echo "Installing Hisat2 app" && \
+    scif install /opt/scif_app_recipes/hisat2_v2.1.0_centos7.scif && \
+    echo "Installing Picard app" && \
+    scif install /opt/scif_app_recipes/picard_v2.18.27_centos7.scif && \
+    echo "Installing csvtk app" && \
+    scif install /opt/scif_app_recipes/csvtk_v0.17.0_centos7.scif && \
+    echo "Installing preseq app" && \
+    scif install /opt/scif_app_recipes/preseq_v2.0.3_centos7.scif && \
+    echo "Installing R app" && \
+    scif install /opt/scif_app_recipes/R_v3.5.1_centos7.scif && \
+    echo "Installing RSeQC app" && \
+    scif install /opt/scif_app_recipes/RSeQC_v3.0.0_centos7.scif && \
+    echo "Installing samtools app" && \
+    scif install /opt/scif_app_recipes/samtools_v1.9_centos7.scif && \
+    echo "Installing stringtie app" && \
+    scif install /opt/scif_app_recipes/stringtie_v1.3.5_centos7.scif && \
+    echo "Installing subread app" && \
+    scif install /opt/scif_app_recipes/subread_v1.6.4_centos7.scif && \
+    echo "Installing gffread app" && \
+    scif install /opt/scif_app_recipes/gffread_v0.9.12_centos7.scif && \
+    echo "Installing deeptools app" && \
+    scif install /opt/scif_app_recipes/deeptools_v2.5.4_centos7.scif && \
+    echo "Installing multiqc app" && \
+    scif install /opt/scif_app_recipes/multiqc_v1.7_centos7.scif
+
+
+    ## R packages
+
+    # Install core R dependencies
+	RUN echo "r <- getOption('repos'); r['CRAN'] <- 'https://ftp.acc.umu.se/mirror/CRAN/'; options(repos = r);" > ~/.Rprofile && \
+    Rscript -e "source('https://bioconductor.org/biocLite.R');biocLite('dupRadar',dependencies=TRUE,lib='/usr/local/lib64/R/library')" && \
+    Rscript -e "install.packages('data.table',dependencies=TRUE,lib='/usr/local/lib64/R/library')" && \
+    Rscript -e "install.packages('gplots',dependencies=TRUE,lib='/usr/local/lib64/R/library')" && \
+    Rscript -e "source('https://bioconductor.org/biocLite.R');biocLite('edgeR',dependencies=TRUE,lib='/usr/local/lib64/R/library')" && \
+    Rscript -e "install.packages('markdown',dependencies=TRUE,lib='/usr/local/lib64/R/library')"
+
 
 # Include ENV variables
 ENV LC_ALL=en_US.UTF-8
