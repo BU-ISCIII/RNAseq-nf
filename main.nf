@@ -745,7 +745,7 @@ process rseqc {
             else if (filename.indexOf("clipping_profile.r") > 0)                "clipping_profile/data/$filename"
             else if (filename.indexOf("clipping_profile.xls") > 0)              "clipping_profile/data/$filename"
             else if (filename.indexOf("clipping_profile.R1.pdf") > 0)           "clipping_profile/plots/$filename"
-            else if (filename.indexOf("clipping_profile.R1.pdf") > 0)           "clipping_profile/plots/$filename"
+            else if (filename.indexOf("clipping_profile.R2.pdf") > 0)           "clipping_profile/plots/$filename"
             else if (filename.indexOf("read_distribution.txt") > 0)             "read_distribution/$filename"
             else if (filename.indexOf("read_duplication.DupRate_plot.pdf") > 0) "read_duplication/$filename"
             else if (filename.indexOf("read_duplication.DupRate_plot.r") > 0)   "read_duplication/rscripts/$filename"
@@ -782,14 +782,14 @@ process rseqc {
     script:
     prefix = bam_rseqc.baseName - ~/(_R1)?(_filtered_)?(_Aligned.sortedByCoord.out)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
     if (params.singleEnd) {
-        paired= '"SE"'
+        paired="SE"
     } else {
-        paired= '"PE"'
+        paired="PE"
     }
     """
     infer_experiment.py -i $bam_rseqc -r $bed12 > ${prefix}.infer_experiment.txt
     clipping_profile.py -i $bam_rseqc -s $paired -o ${prefix}
-    junction_annotation.py -i $bam_rseqc -o ${prefix}.rseqc -r $bed12
+    junction_annotation.py -i $bam_rseqc -o ${prefix} -r $bed12
     bam_stat.py -i $bam_rseqc > ${prefix}.bam_stat.txt
     junction_saturation.py -i $bam_rseqc -o ${prefix} -r $bed12 2> ${prefix}.junction_annotation_log.txt
     inner_distance.py -i $bam_rseqc -o ${prefix} -r $bed12
