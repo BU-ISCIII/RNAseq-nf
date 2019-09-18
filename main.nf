@@ -780,7 +780,7 @@ process rseqc {
     file "*.{txt,pdf,r,xls}" into rseqc_results
 
     script:
-    prefix = bam_rseqc.baseName - ~/(_R1)?(_filtered_)?(_Aligned.sortedByCoord.out)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
+    prefix = bam_rseqc.baseName - 'Aligned.sortedByCoord.out'
     if (params.singleEnd) {
         paired="SE"
     } else {
@@ -851,7 +851,7 @@ process genebody_coverage {
     file "*.{txt,pdf,r}" into genebody_coverage_results
 
     script:
-    prefix = bam.baseName - ~/(_R1)?(_filtered_)?(_Aligned.sortedByCoord.out)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
+    prefix = bam.baseName - 'Aligned.sortedByCoord.out'
     """
     samtools index $bam
     geneBody_coverage.py \\
@@ -876,11 +876,12 @@ process preseq {
     file bam_preseq
 
     output:
-    file "${bam_preseq.baseName}.ccurve.txt" into preseq_results
+    file "${prefix}.ccurve.txt" into preseq_results
 
     script:
+    prefix = bam_preseq.baseName - 'Aligned.sortedByCoord.out'
     """
-    preseq lc_extrap -v -B $bam_preseq -o ${bam_preseq.baseName}.ccurve.txt
+    preseq lc_extrap -v -B $bam_preseq -o ${prefix}.ccurve.txt
     """
 }
 
@@ -900,23 +901,24 @@ process markDuplicates {
     file bam from bam_markduplicates
 
     output:
-    file "${bam.baseName}.markDups.bam" into bam_md
-    file "${bam.baseName}.markDups_metrics.txt" into picard_results
-    file "${bam.baseName}.markDups.bam.bai"
+    file "${prefix}.markDups.bam" into bam_md
+    file "${prefix}.markDups_metrics.txt" into picard_results
+    file "${prefix}.markDups.bam.bai"
 
     script:
 //    markdup_java_options = (task.memory.toGiga() > 8) ? ${params.markdup_java_options} : "\"-Xms" +  (task.memory.toGiga() / 2 )+"g "+ "-Xmx" + (task.memory.toGiga() - 1)+ "g\""
 
     """
+    prefix = bam.baseName - 'Aligned.sortedByCoord.out'
     picard MarkDuplicates \\
         INPUT=$bam \\
-        OUTPUT=${bam.baseName}.markDups.bam \\
-        METRICS_FILE=${bam.baseName}.markDups_metrics.txt \\
+        OUTPUT=${prefix}.markDups.bam \\
+        METRICS_FILE=${prefix}.markDups_metrics.txt \\
         REMOVE_DUPLICATES=false \\
         ASSUME_SORTED=true \\
         PROGRAM_RECORD_ID='null' \\
         VALIDATION_STRINGENCY=LENIENT
-    samtools index ${bam.baseName}.markDups.bam
+    samtools index ${prefix}.markDups.bam
     """
 }
 
@@ -984,9 +986,9 @@ process featureCounts {
     file biotypes_header from ch_biotypes_header.collect()
 
     output:
-    file "${bam_featurecounts.baseName}_gene.featureCounts.txt" into geneCounts, featureCounts_to_merge
-    file "${bam_featurecounts.baseName}_gene.featureCounts.txt.summary" into featureCounts_logs
-    file "${bam_featurecounts.baseName}_biotype_counts*mqc.{txt,tsv}" into featureCounts_biotype
+    file "${sample_name}_gene.featureCounts.txt" into geneCounts, featureCounts_to_merge
+    file "${sample_name}_gene.featureCounts.txt.summary" into featureCounts_logs
+    file "${sample_name}_biotype_counts*mqc.{txt,tsv}" into featureCounts_biotype
 
     script:
     def featureCounts_direction = 0
@@ -999,10 +1001,10 @@ process featureCounts {
     // Try to get real sample name
     sample_name = bam_featurecounts.baseName - 'Aligned.sortedByCoord.out'
     """
-    featureCounts -a $gtf -g ${params.fcGroupFeatures} -o ${bam_featurecounts.baseName}_gene.featureCounts.txt $extraAttributes -p -s $featureCounts_direction $bam_featurecounts
-    featureCounts -a $gtf -g ${params.fcGroupFeaturesType} -o ${bam_featurecounts.baseName}_biotype.featureCounts.txt -p -s $featureCounts_direction $bam_featurecounts
-    cut -f 1,7 ${bam_featurecounts.baseName}_biotype.featureCounts.txt | tail -n +3 | cat $biotypes_header - >> ${bam_featurecounts.baseName}_biotype_counts_mqc.txt
-    mqc_features_stat.py ${bam_featurecounts.baseName}_biotype_counts_mqc.txt -s $sample_name -f rRNA -o ${bam_featurecounts.baseName}_biotype_counts_gs_mqc.tsv
+    featureCounts -a $gtf -g ${params.fcGroupFeatures} -o ${sample_name}_gene.featureCounts.txt $extraAttributes -p -s $featureCounts_direction $bam_featurecounts
+    featureCounts -a $gtf -g ${params.fcGroupFeaturesType} -o ${sample_name}_biotype.featureCounts.txt -p -s $featureCounts_direction $bam_featurecounts
+    cut -f 1,7 ${bam_featurecounts.baseName}_biotype.featureCounts.txt | tail -n +3 | cat $biotypes_header - >> ${sample_name}_biotype_counts_mqc.txt
+    mqc_features_stat.py ${bam_featurecounts.baseName}_biotype_counts_mqc.txt -s $sample_name -f rRNA -o ${sample_name}_biotype_counts_gs_mqc.tsv
     """
 }
 
@@ -1024,7 +1026,7 @@ process merge_featureCounts {
     def single = input_files instanceof Path ? 1 : input_files.size()
     def merge = (single == 1) ? 'cat' : 'csvtk join -t -f "Geneid,Start,Length,End,Chr,Strand,gene_name"'
     """
-    $merge $input_files | csvtk cut -t -f "-Start,-Chr,-End,-Length,-Strand" | sed 's/Aligned.sortedByCoord.out.markDups.bam//g' > merged_gene_counts.txt
+    $merge $input_files | csvtk cut -t -f "-Start,-Chr,-End,-Length,-Strand" | sed 's/.markDups.bam//g' > merged_gene_counts.txt
     """
 }
 
@@ -1047,13 +1049,14 @@ process stringtieFPKM {
     file gtf from gtf_stringtieFPKM.collect()
 
     output:
-    file "${bam_stringtieFPKM.baseName}_transcripts.gtf"
-    file "${bam_stringtieFPKM.baseName}.gene_abund.txt"
-    file "${bam_stringtieFPKM}.cov_refs.gtf"
+    file "${prefix}_transcripts.gtf"
+    file "${prefix}.gene_abund.txt"
+    file "${prefix}.cov_refs.gtf"
     file ".command.log" into stringtie_log
-    file "${bam_stringtieFPKM.baseName}_ballgown"
+    file "${prefix}_ballgown"
 
     script:
+    prefix = bam_stringtieFPKM.baseName - 'Aligned.sortedByCoord.out'
     def st_direction = ''
     if (forward_stranded && !unstranded){
         st_direction = "--fr"
@@ -1063,13 +1066,13 @@ process stringtieFPKM {
     """
     stringtie $bam_stringtieFPKM \\
         $st_direction \\
-        -o ${bam_stringtieFPKM.baseName}_transcripts.gtf \\
+        -o ${prefix}_transcripts.gtf \\
         -v \\
         -G $gtf \\
-        -A ${bam_stringtieFPKM.baseName}.gene_abund.txt \\
-        -C ${bam_stringtieFPKM}.cov_refs.gtf \\
+        -A ${prefix}.gene_abund.txt \\
+        -C ${prefix}.cov_refs.gtf \\
         -e \\
-        -b ${bam_stringtieFPKM.baseName}_ballgown
+        -b ${prefix}_ballgown
     """
 }
 
