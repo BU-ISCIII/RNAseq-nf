@@ -782,9 +782,9 @@ process rseqc {
     script:
     prefix = bam_rseqc.baseName - ~/(_R1)?(_filtered_)?(_Aligned.sortedByCoord.out)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
     if (params.singleEnd) {
-        paired="SE"
+        paired= '"SE"'
     } else {
-        paired="PE"
+        paired= '"PE"'
     }
     """
     infer_experiment.py -i $bam_rseqc -r $bed12 > ${prefix}.infer_experiment.txt
