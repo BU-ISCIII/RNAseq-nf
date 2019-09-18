@@ -140,6 +140,7 @@ params.unstranded = false
 params.name = false
 params.singleEnd = false
 params.pico = false
+params.saveAlignedIntermediates = false
 params.saveReference = false
 params.saveTrimmed = false
 params.fcGroupFeatures = 'gene_name'
