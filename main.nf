@@ -600,7 +600,7 @@ if(params.aligner == 'star'){
         file "${prefix}Aligned.sortedByCoord.out.bam.bai" into bam_index_rseqc, bam_index_genebody
 
         script:
-        prefix = reads[0].toString() - ~/(_R1)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
+        prefix = reads[0].toString() - ~/(_R1)?(_filtered_)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
         def star_mem = task.memory ?: params.star_memory ?: false
         def avail_mem = star_mem ? "--limitBAMsortRAM ${star_mem.toBytes() - 100000000}" : ''
         seqCenter = params.seqCenter ? "--outSAMattrRGline ID:$prefix 'CN:$params.seqCenter'" : ''
@@ -616,7 +616,7 @@ if(params.aligner == 'star'){
             --runDirPerm All_RWX \\
             --outFileNamePrefix $prefix $seqCenter
 
-        samtools index ${prefix}Aligned.sortedByCoord.out.bam
+        samtools index ${prefix}_Aligned.sortedByCoord.out.bam
         """
     }
     // Filter removes all 'aligned' channels that fail the check
@@ -658,7 +658,7 @@ if(params.aligner == 'hisat2'){
 
         script:
         index_base = hs2_indices[0].toString() - ~/.\d.ht2l?/
-        prefix = reads[0].toString() - ~/(_R1)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
+        prefix = reads[0].toString() - ~/(_R1)?(_filtered_)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
 //        seqCenter = params.seqCenter ? "--rg-id ${prefix} --rg CN:${params.seqCenter.replaceAll('\\s','_')}" : ''
 //                   --summary-file ${prefix}.hisat2_summary.txt $seqCenter \\
 //                   --summary-file ${prefix}.hisat2_summary.txt $seqCenter \\
@@ -780,20 +780,21 @@ process rseqc {
     file "*.{txt,pdf,r,xls}" into rseqc_results
 
     script:
+    prefix = bam_rseqc.baseName - ~/(_R1)?(_filtered_)?(_Aligned.sortedByCoord.out)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
     if (params.singleEnd) {
         paired="SE"
     } else {
         paired="PE"
     }
     """
-    infer_experiment.py -i $bam_rseqc -r $bed12 > ${bam_rseqc.baseName}.infer_experiment.txt
-    clipping_profile.py -i $bam_rseqc -s $paired -o ${bam_rseqc.baseName}.clipping_profile
-    junction_annotation.py -i $bam_rseqc -o ${bam_rseqc.baseName}.rseqc -r $bed12
-    bam_stat.py -i $bam_rseqc > ${bam_rseqc.baseName}.bam_stat.txt
-    junction_saturation.py -i $bam_rseqc -o ${bam_rseqc.baseName}.rseqc -r $bed12 2> ${bam_rseqc.baseName}.junction_annotation_log.txt
-    inner_distance.py -i $bam_rseqc -o ${bam_rseqc.baseName}.rseqc -r $bed12
-    read_distribution.py -i $bam_rseqc -r $bed12 > ${bam_rseqc.baseName}.read_distribution.txt
-    read_duplication.py -i $bam_rseqc -o ${bam_rseqc.baseName}.read_duplication
+    infer_experiment.py -i $bam_rseqc -r $bed12 > ${prefix}.infer_experiment.txt
+    clipping_profile.py -i $bam_rseqc -s $paired -o ${prefix}
+    junction_annotation.py -i $bam_rseqc -o ${prefix}.rseqc -r $bed12
+    bam_stat.py -i $bam_rseqc > ${prefix}.bam_stat.txt
+    junction_saturation.py -i $bam_rseqc -o ${prefix} -r $bed12 2> ${prefix}.junction_annotation_log.txt
+    inner_distance.py -i $bam_rseqc -o ${prefix} -r $bed12
+    read_distribution.py -i $bam_rseqc -r $bed12 > ${prefix}.read_distribution.txt
+    read_duplication.py -i $bam_rseqc -o ${prefix}.read_duplication
     """
 }
 
@@ -850,13 +851,14 @@ process genebody_coverage {
     file "*.{txt,pdf,r}" into genebody_coverage_results
 
     script:
+    prefix = bam.baseName - ~/(_R1)?(_filtered_)?(_Aligned.sortedByCoord.out)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
     """
     samtools index $bam
     geneBody_coverage.py \\
         -i $bam \\
-        -o ${bam.baseName}.rseqc \\
+        -o ${prefix} \\
         -r $bed12
-    mv log.txt ${bam.baseName}.rseqc.log.txt
+    mv log.txt ${prefix}.log.txt
     """
 }
 
