@@ -35,9 +35,9 @@ For further reading and documentation see the [FastQC help](http://www.bioinform
 
 **Output directory: `01-fastqc`**
 
-* `{sample_id}_fastqc.html`
+* `{sample_id}_R[12]_fastqc.html`
   * html report. This file can be opened in your favourite web browser (Firefox/chrome preferable) and it contains the different graphs that fastqc calculates for QC.
-* `zips/{sample_id}_fastqc.zip`
+* `zips/{sample_id}_R[12]_fastqc.zip`
   * zip file containing the FastQC report, tab-delimited data file and plot images
 
   ### Trimming
@@ -68,15 +68,15 @@ The STAR section of the MultiQC report shows a bar plot with alignment rates: go
 
 **Output directory: `03-alignment`**
 
-* `{sample_id}filteredAligned.sortedByCoord.out.bam`
+* `{sample_id}_filteredAligned.sortedByCoord.out.bam`
   * The aligned BAM file
-* `{sample_id}filteredAligned.sortedByCoord.out.bam.bai`
+* `{sample_id}_filteredAligned.sortedByCoord.out.bam.bai`
   * The aligned BAM file index
-* `logs/{sample_id}filteredLog.final.out`
+* `logs/{sample_id}_filteredLog.final.out`
   * The STAR alignment report, contains mapping results summary
-* `logs/{sample_id}filteredLog.out` and `{sample_id}filteredLog.progress.out`
+* `logs/{sample_id}_filteredLog.out` and `{sample_id}filteredLog.progress.out`
   * STAR log files, containing a lot of detailed information about the run. Typically only useful for debugging purposes.
-* `logs/{sample_id}filteredSJ.out.tab`
+* `logs/{sample_id}_filteredSJ.out.tab`
   * Filtered splice junctions detected in the mapping
 
 ##Alignment Quality Control
@@ -93,6 +93,8 @@ These are all quality metrics files and contains the raw data used for the plots
 **Output: `bam_stat/**
 
 This script gives numerous statistics about the aligned BAM files produced by STAR. A typical output looks as follows:
+
+**From the `{sample_id}.bam_stat.txt` file:**
 
 ```txt
 #Output (all numbers are read count)
@@ -144,7 +146,7 @@ Example output from an unstranded (~50% sense/antisense) library of paired end d
 **From MultiQC report:**
 ![infer_experiment](images/rseqc_infer_experiment_plot.png)
 
-**From the `infer_experiment.txt` file:**
+**From the `{sample_id}.infer_experiment.txt` file:**
 
 ```txt
 This is PairEnd Data
@@ -158,7 +160,7 @@ RSeQC documentation: [infer_experiment.py](http://rseqc.sourceforge.net/#infer-e
 
 #### Junction saturation
 **Output: `junction_saturation/`**
-* `{sample_id}_rseqc.junctionSaturation_plot.pdf`
+* `{sample_id}.junctionSaturation_plot.pdf`
 * `rscripts/{sample_id}.junctionSaturation_plot.r`
 
 This script shows the number of splice sites detected at the data at various levels of subsampling. A sample that reaches a plateau before getting to 100% data indicates that all junctions in the library have been detected, and that further sequencing will not yield more observations. A good sample should approach such a plateau of _Known junctions_, very deep sequencing is typically requires to saturate all _Novel Junctions_ in a sample.
@@ -169,33 +171,14 @@ None of the lines in this example have plateaued and thus these samples could re
 
 RSeQC documentation: [junction_saturation.py](http://rseqc.sourceforge.net/#junction-saturation-py)
 
-#### RPKM saturation
-**Output: `RPKM_saturation/`**
-
-* `rpkm/{sample_id}_RPKM_saturation.eRPKM.xls`
-* `counts/{sample_id}_RPKM_saturation.rawCount.xls`
-* `{sample_id}_RPKM_saturation.saturation.pdf`
-* `rscripts/{sample_id}_RPKM_saturation.saturation.r`
-
-This tool resamples a subset of the total RNA reads and calculates the RPKM value for each subset. We use the default subsets of every 5% of the total reads.
-A percent relative error is then calculated based on the subsamples; this is the y-axis in the graph. A typical PDF figure looks as follows:
-
-![RPKM saturation](images/saturation.png)
-
-A complex library will have low resampling error in well expressed genes.
-
-This data is not currently reported in the MultiQC report.
-
-RSeQC documentation: [RPKM_saturation.py](http://rseqc.sourceforge.net/#rpkm-saturation-py)
-
 
 #### Read duplication
 **Output: `read_duplication/`**
 
-* `{sample_id}_read_duplication.DupRate_plot.pdf`
-* `rscripts/{sample_id}_read_duplication.DupRate_plot.r`
-* `dup_pos/{sample_id}_read_duplication.pos.DupRate.xls`
-* `dup_seq/{sample_id}_read_duplication.seq.DupRate.xls`
+* `{sample_id}.read_duplication.DupRate_plot.pdf`
+* `rscripts/{sample_id}.read_duplication.DupRate_plot.r`
+* `dup_pos/{sample_id}.read_duplication.pos.DupRate.xls`
+* `dup_seq/{sample_id}.read_duplication.seq.DupRate.xls`
 
 This plot shows the number of reads (y-axis) with a given number of exact duplicates (x-axis). Most reads in an RNA-seq library should have a low number of exact duplicates. Samples which have many reads with many duplicates (a large area under the curve) may be suffering excessive technical duplication.
 
@@ -206,9 +189,10 @@ RSeQC documentation: [read_duplication.py](http://rseqc.sourceforge.net/#read-du
 #### Inner distance
 **Output: `inner_distance/`**
 
-* `{sample_id}_rseqc.inner_distance.txt`
-* `data/{sample_id}_rseqc.inner_distance_freq.txt`
-* `rscripts/{sample_id}_rseqc.inner_distance_plot.r`
+* `{sample_id}.inner_distance.txt`
+* `data/{sample_id}.inner_distance_freq.txt`
+* `rscripts/{sample_id}.inner_distance_plot.r`
+* `plots/{sample_id}.inner_distance.pdf`
 
 The inner distance script tries to calculate the inner distance between two paired RNA reads. It is the distance between the end of read 1 to the start of read 2,
 and it is sometimes confused with the insert size (see [this blog post](http://thegenomefactory.blogspot.com.au/2013/08/paired-end-read-confusion-library.html) for disambiguation):
@@ -227,9 +211,9 @@ RSeQC documentation: [inner_distance.py](http://rseqc.sourceforge.net/#inner-dis
 
 **Output: `geneBodyCoverage/`**
 
-* `{sample_id}_rseqc.geneBodyCoverage.curves.pdf`
-* `rscripts/{sample_id}_rseqc.geneBodyCoverage.r`
-* `data/{sample_id}_rseqc.geneBodyCoverage.txt`
+* `{sample_id}.geneBodyCoverage.curves.pdf`
+* `rscripts/{sample_id}.geneBodyCoverage.r`
+* `data/{sample_id}.geneBodyCoverage.txt`
 
 This script calculates the reads coverage across gene bodies. This makes it easy to identify 3' or 5' skew in libraries. A skew towards increased 3' coverage can happen in degraded samples prepared with poly-A selection.
 
@@ -258,11 +242,11 @@ RSeQC documentation: [read_distribution.py](http://rseqc.sourceforge.net/#read-d
 #### Junction annotation
 **Output: `junction_annotation/`**
 
-* `{sample_id}_junction_annotation_log.txt`
-* `data/{sample_id}_rseqc.junction.xls`
-* `rscripts/{sample_id}_rseqc.junction_plot.r`
-* `events/{sample_id}_rseqc.splice_events.pdf`
-* `junctions/{sample_id}_rseqc.splice_junction.pdf`
+* `{sample_id}.junction_annotation_log.txt`
+* `data/{sample_id}.junction.xls`
+* `rscripts/{sample_id}.junction_plot.r`
+* `events/{sample_id}.splice_events.pdf`
+* `junctions/{sample_id}.splice_junction.pdf`
 
 Junction annotation compares detected splice junctions to a reference gene model. An RNA read can be spliced 2 or more times, each time is called a splicing event.
 
@@ -325,11 +309,11 @@ StringTie outputs FPKM metrics for genes and transcripts as well as the transcri
 
 **Output directory: `08-stringtieFPKM`**
 
-* `{sample_id}_Aligned.sortedByCoord.out.bam.gene_abund.txt`
+* `{sample_id}.gene_abund.txt`
   * Gene aboundances, FPKM values
-* `{sample_id}_Aligned.sortedByCoord.out.bam_transcripts.gtf`
+* `{sample_id}_transcripts.gtf`
   * This `.gtf` file contains all of the assembled transcipts from StringTie
-* `{sample_id}_Aligned.sortedByCoord.out.bam.cov_refs.gtf`
+* `{sample_id}.cov_refs.gtf`
   * This `.gtf` file contains the transcripts that are fully covered by reads.
 
 ##Counts analysis and Differential Expression (DE)
