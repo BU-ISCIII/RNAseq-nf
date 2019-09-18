@@ -129,25 +129,31 @@ if (params.help){
     helpMessage()
     exit 0
 }
-
+//Other
+params.help = false
+params.name = false
+//References
 params.genome = false
 params.genomes = false
-params.help = false
 params.readPaths = false
+//Library data
 params.forward_stranded = false
 params.reverse_stranded = false
 params.unstranded = false
-params.name = false
 params.singleEnd = false
 params.pico = false
+//Alignment
+params.aligner = 'star'
+params.seqCenter = false
+//Saving files
 params.saveAlignedIntermediates = false
 params.saveReference = false
 params.saveTrimmed = false
+//Feature Counts
 params.fcGroupFeatures = 'gene_name'
 params.fcGroupFeaturesType = 'gene_name'
-params.aligner = 'star'
 params.fcExtraAttributes = 'gene_name'
-params.seqCenter = false
+//Skip steps
 params.skip_qc = false
 params.skip_fastqc = false
 params.skip_genebody_coverage = false
