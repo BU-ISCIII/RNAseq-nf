@@ -33,7 +33,7 @@ Pipeline overview:
  - 5. : Assembly
    - 5.1: stringtie FPKM
  - 6. : Differential expression
-   - 6.1: edgeR
+   - 6.1: edgeR (3 or mor samples needed)
 	 - 6.2: DESeq2
  - 7. : Quality control
    - 7.1: RSeQC analysis
