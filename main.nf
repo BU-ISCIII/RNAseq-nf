@@ -808,7 +808,7 @@ process rseqc {
 
 /*
  * Step 4.1 Subsample the BAM files if necessary
-
+ */
 bam_forSubsamp
     .filter { it.size() > params.subsampFilesizeThreshold }
     .map { [it, params.subsampFilesizeThreshold / it.size() ] }
@@ -831,7 +831,7 @@ process bam_subsample {
     samtools view -s $fraction -b $bam | samtools sort -o ${bam.baseName}_subsamp.bam
     """
 }
- */
+
 
 /*
  * Step 4.2 Rseqc genebody_coverage
