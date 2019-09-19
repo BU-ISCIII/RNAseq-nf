@@ -1011,8 +1011,8 @@ process featureCounts {
     """
     featureCounts -a $gtf -g ${params.fcGroupFeatures} -o ${sample_name}_gene.featureCounts.txt $extraAttributes -p -s $featureCounts_direction $bam_featurecounts
     featureCounts -a $gtf -g ${params.fcGroupFeaturesType} -o ${sample_name}_biotype.featureCounts.txt -p -s $featureCounts_direction $bam_featurecounts
-    cut -f 1,7 ${bam_featurecounts.baseName}_biotype.featureCounts.txt | tail -n +3 | cat $biotypes_header - >> ${sample_name}_biotype_counts_mqc.txt
-    mqc_features_stat.py ${bam_featurecounts.baseName}_biotype_counts_mqc.txt -s $sample_name -f rRNA -o ${sample_name}_biotype_counts_gs_mqc.tsv
+    cut -f 1,7 ${sample_name}_biotype.featureCounts.txt | tail -n +3 | cat $biotypes_header - >> ${sample_name}_biotype_counts_mqc.txt
+    mqc_features_stat.py ${sample_name}_biotype_counts_mqc.txt -s $sample_name -f rRNA -o ${sample_name}_biotype_counts_gs_mqc.tsv
     """
 }
 
