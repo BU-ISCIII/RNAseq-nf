@@ -918,7 +918,6 @@ process markDuplicates {
 //    markdup_java_options = (task.memory.toGiga() > 8) ? ${params.markdup_java_options} : "\"-Xms" +  (task.memory.toGiga() / 2 )+"g "+ "-Xmx" + (task.memory.toGiga() - 1)+ "g\""
 
     """
-    prefix = bam.baseName - 'Aligned.sortedByCoord.out'
     picard MarkDuplicates \\
         INPUT=$bam \\
         OUTPUT=${prefix}.markDups.bam \\
