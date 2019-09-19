@@ -788,7 +788,7 @@ process rseqc {
     file "*.{txt,pdf,r,xls}" into rseqc_results
 
     script:
-    prefix = bam_rseqc.baseName - 'Aligned.sortedByCoord.out'
+    prefix = bam_rseqc.baseName - '_filteredAligned.sortedByCoord.out'
     if (params.singleEnd) {
         paired="SE"
     } else {
@@ -859,7 +859,7 @@ process genebody_coverage {
     file "*.{txt,pdf,r}" into genebody_coverage_results
 
     script:
-    prefix = bam.baseName - 'Aligned.sortedByCoord.out'
+    prefix = bam.baseName - '_filteredAligned.sortedByCoord.out'
     """
     samtools index $bam
     geneBody_coverage.py \\
@@ -887,7 +887,7 @@ process preseq {
     file "${prefix}.ccurve.txt" into preseq_results
 
     script:
-    prefix = bam_preseq.baseName - 'Aligned.sortedByCoord.out'
+    prefix = bam_preseq.baseName - '_filteredAligned.sortedByCoord.out'
     """
     preseq lc_extrap -v -B $bam_preseq -o ${prefix}.ccurve.txt
     """
@@ -914,7 +914,7 @@ process markDuplicates {
     file "${prefix}.markDups.bam.bai"
 
     script:
-    prefix = bam.baseName - 'Aligned.sortedByCoord.out'
+    prefix = bam.baseName - '_filteredAligned.sortedByCoord.out'
 //    markdup_java_options = (task.memory.toGiga() > 8) ? ${params.markdup_java_options} : "\"-Xms" +  (task.memory.toGiga() / 2 )+"g "+ "-Xmx" + (task.memory.toGiga() - 1)+ "g\""
 
     """
@@ -1007,7 +1007,7 @@ process featureCounts {
         featureCounts_direction = 2
     }
     // Try to get real sample name
-    sample_name = bam_featurecounts.baseName - 'Aligned.sortedByCoord.out'
+    sample_name = bam_featurecounts.baseName - '_filteredAligned.sortedByCoord.out'
     """
     featureCounts -a $gtf -g ${params.fcGroupFeatures} -o ${sample_name}_gene.featureCounts.txt $extraAttributes -p -s $featureCounts_direction $bam_featurecounts
     featureCounts -a $gtf -g ${params.fcGroupFeaturesType} -o ${sample_name}_biotype.featureCounts.txt -p -s $featureCounts_direction $bam_featurecounts
@@ -1064,7 +1064,7 @@ process stringtieFPKM {
     file "${prefix}_ballgown"
 
     script:
-    prefix = bam_stringtieFPKM.baseName - 'Aligned.sortedByCoord.out'
+    prefix = bam_stringtieFPKM.baseName - '_filteredAligned.sortedByCoord.out'
     def st_direction = ''
     if (forward_stranded && !unstranded){
         st_direction = "--fr"
