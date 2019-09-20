@@ -263,12 +263,17 @@ RSeQC documentation: [junction_annotation.py](http://rseqc.sourceforge.net/#junc
 
 **Output directory: `06-removeDuplicates`**
 
-* `{sample_id}_markDups.bam_duprateExpDens.pdf`
-* `{sample_id}_markDups.bam_duprateExpBoxplot.pdf`
-* `{sample_id}_markDups.bam_expressionHist.pdf`
-* `{sample_id}_markDups.bam_dupMatrix.txt`
-* `{sample_id}_markDups.bam_duprateExpDensCurve.txt`
-* `{sample_id}_markDups.bam_intercept_slope.txt`
+* `{sample_id}.markDups.bam`
+* `{sample_id}.markDups.bam.bai`
+* `{sample_id}.markDups_dup_intercept_mqc.txt`
+* `{sample_id}.markDups_duprateExpDensCurve_mqc.tx`
+* `box_plot/{sample_id}.markDups_duprateExpBoxplot.pdf`
+* `gene_data/{sample_id}.markDups_dupMatrix.txt`
+* `histograms/{sample_id}.markDups_expressionHist.pdf`
+* `intercepts_slopes/{sample_id}.markDups_intercept_slope.txt`
+* `metrics/{sample_id}.markDups_metrics.txt`
+* `scatter_plots/{sample_id}.markDups.bam_duprateExpDens.pdf`
+
 
 DupRadar documentation: [dupRadar docs](https://www.bioconductor.org/packages/devel/bioc/vignettes/dupRadar/inst/doc/dupRadar.html)
 
@@ -281,7 +286,7 @@ Note that these are predictive numbers only, not absolute. The MultiQC plot can 
 
 **Output directory: `05-preseq`**
 
-* `{sample_id}_ccurve.txt`
+* `{sample_id}.ccurve.txt`
   * This file contains plot values for the complexity curve, plotted in the MultiQC report.
 
 ### featureCounts
@@ -295,12 +300,15 @@ We also use featureCounts to count overlaps with different classes of features. 
 
 **Output directory: `07-featureCounts`**
 
-* `{sample_id}.bam_biotype_counts.txt`
+* `biotype_counts/{sample_id}_biotype_counts.txt`
   * Read counts for the different gene biotypes that featureCounts distinguishes.
-* `{sample_id}.featureCounts.txt`
+* `gene_counts/{sample_id}_gene.featureCounts.txt`
   * Read the counts for each gene provided in the reference `gtf` file
-* `{sample_id}.featureCounts.txt.summary`
+* `gene_counts_summaries/{sample_id}_gene.featureCounts.txt.summary`
   * Summary file, containing statistics about the counts
+* `merged_gene_counts.txt`
+  * File with gene counts merged between all samples.
+
 
 ### StringTie
 [StringTie](https://ccb.jhu.edu/software/stringtie/) assembles RNA-Seq alignments into potential transcripts. It assembles and quantitates full-length transcripts representing multiple splice variants for each gene locus.
@@ -311,9 +319,9 @@ StringTie outputs FPKM metrics for genes and transcripts as well as the transcri
 
 * `{sample_id}.gene_abund.txt`
   * Gene aboundances, FPKM values
-* `{sample_id}_transcripts.gtf`
+* `transcripts/{sample_id}_transcripts.gtf`
   * This `.gtf` file contains all of the assembled transcipts from StringTie
-* `{sample_id}.cov_refs.gtf`
+* `cov_refs/{sample_id}.cov_refs.gtf`
   * This `.gtf` file contains the transcripts that are fully covered by reads.
 
 ##Counts analysis and Differential Expression (DE)
@@ -334,13 +342,13 @@ StringTie outputs FPKM metrics for genes and transcripts as well as the transcri
   * MDS scatter plot, showing sample similarity
 * `edgeR_MDS_distance_matrix.txt`
   * Distance matrix containing raw data from MDS analysis
-* `edgeR_MDS_plot_coordinates.txt`
+* `edgeR_MDS_plot_coordinates_mqc.txt`
   * Scatter plot coordinates from MDS plot, used for MultiQC report
 * `log2CPM_sample_distances_dendrogram.pdf`
   * Dendrogram plot showing the euclidian distance between your samples
 * `log2CPM_sample_distances_heatmap.pdf`
   * Heatmap plot showing the euclidian distance between your samples
-* `log2CPM_sample_distances.txt`
+* `log2CPM_sample_distances_mqc.csv`
   * Raw data used for heatmap and dendrogram plots.
 
 ##Final reports
@@ -351,9 +359,9 @@ The pipeline has special steps which allow the software versions used to be repo
 
 **Output directory: `99-stats/MultiQC`**
 
-* `Project_multiqc_report.html`
+* `multiqc_report.html`
   * MultiQC report - a standalone HTML file that can be viewed in your web browser
-* `Project_multiqc_data/`
+* `multiqc_data/`
   * Directory containing parsed statistics from the different tools used in the pipeline
 
 For more information about how to use MultiQC reports, see [http://multiqc.info](http://multiqc.info)
