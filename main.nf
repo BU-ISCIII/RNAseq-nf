@@ -159,6 +159,7 @@ params.skip_preseq = false
 params.skip_dupradar = false
 params.skip_edger = false
 params.skip_multiqc = false
+params.skip_rseqc = false
 // Defaults
 sampleLevel = false
 hisatBuildMemory = 200 // Required amount of memory in GB to build HISAT2 index with splice sites
