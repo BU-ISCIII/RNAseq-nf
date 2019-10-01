@@ -13,7 +13,9 @@ work/
 data/
 results/
 results2/
-
 ## Oter
 .DS_Store
 *.pyc
+.Rhistory
+##Executables
+nextflow

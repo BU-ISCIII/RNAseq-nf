@@ -10,12 +10,12 @@ RUN echo "Install basic development tools" && \
     easy_install pip && \
     echo "Installing SCI-F" && \
     pip install scif ipython
-	
+
 RUN echo "Install miniconda"
     curl -fsSL https://repo.continuum.io/miniconda/Miniconda3-4.6.14-Linux-x86_64.sh -o miniconda_v4.6.14.sh
 	bash miniconda_v4.6.14.sh -b -p /opt/miniconda
 	conda init; conda config --append channels conda-forge; conda config --add channels defaults; conda config --add channels bioconda
-	
+
 ENV PATH=$PATH:/opt/miniconda/bin/conda/bin
 
 RUN echo "Installing FastQC app" && \
@@ -59,8 +59,8 @@ RUN echo "Installing FastQC app" && \
     Rscript -e "install.packages('gplots',dependencies=TRUE,lib='/usr/local/lib64/R/library')" && \
     Rscript -e "source('https://bioconductor.org/biocLite.R');biocLite('edgeR',dependencies=TRUE,lib='/usr/local/lib64/R/library')" && \
     Rscript -e "install.packages('markdown',dependencies=TRUE,lib='/usr/local/lib64/R/library')"
-	
-	
+
+
 # Include ENV variables
 ENV LC_ALL=en_US.UTF-8
 ENV PATH=$PATH:/scif/apps/aragorn/bin
@@ -168,6 +168,6 @@ ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/scif/apps/wgsoutbreaker/lib/lib
 #ENTRYPOINT ["/opt/docker-entrypoint.sh"]
 #CMD ["scif"]
 RUN echo "export LC_ALL=en_US.UTF-8" >> /etc/bashrc
-RUN find /scif/apps -maxdepth 2 -name "bin" | while read in; do echo "export PATH=\$PATH:$in" >> /etc/bashrc;done 
+RUN find /scif/apps -maxdepth 2 -name "bin" | while read in; do echo "export PATH=\$PATH:$in" >> /etc/bashrc;done
 RUN if [ -z "${LD_LIBRARY_PATH-}" ]; then echo "export LD_LIBRARY_PATH=/usr/local/lib" >> /etc/bashrc;fi
 RUN find /scif/apps -maxdepth 2 -name "lib" | while read in; do echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$in" >> /etc/bashrc;done
