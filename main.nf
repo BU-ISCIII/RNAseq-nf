@@ -769,9 +769,10 @@ process rseqc {
             else if (filename.indexOf("inner_distance_plot.r") > 0)             "inner_distance/rscripts/$filename"
             else if (filename.indexOf("inner_distance_plot.pdf") > 0)           "inner_distance/plots/$filename"
             else if (filename.indexOf("junction_plot.r") > 0)                   "junction_annotation/rscripts/$filename"
-            else if (filename.indexOf("junction_annotation_log.txt") > 0)       "junction_annotation/$filename"
+            else if (filename.indexOf("junction_annotation_log.txt") > 0)       "junction_annotation/logs/$filename"
             else if (filename.indexOf("splice_events.pdf") > 0)                 "junction_annotation/events/$filename"
             else if (filename.indexOf("splice_junction.pdf") > 0)               "junction_annotation/junctions/$filename"
+            else if (filename.indexOf("junction.xls") > 0)                      "junction_annotation/data/$filename"
             else if (filename.indexOf("junctionSaturation_plot.pdf") > 0)       "junction_saturation/$filename"
             else if (filename.indexOf("junctionSaturation_plot.r") > 0)         "junction_saturation/rscripts/$filename"
             else filename
