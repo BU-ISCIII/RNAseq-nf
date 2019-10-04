@@ -901,7 +901,7 @@ process preseq {
  */
 process markDuplicates {
     tag "${bam.baseName - '.sorted'}"
-    publishDir "${params.outdir}/06-removeDuplicates", mode: 'copy',
+    publishDir "${params.outdir}/06-removeDuplicates/picard", mode: 'copy',
         saveAs: {filename -> filename.indexOf("_metrics.txt") > 0 ? "metrics/$filename" : "$filename"}
 
     when:
@@ -945,7 +945,7 @@ process dupradar {
             else if (filename.indexOf("_duprateExpBoxplot.pdf") > 0) "box_plots/$filename"
             else if (filename.indexOf("_expressionHist.pdf") > 0) "histograms/$filename"
             else if (filename.indexOf("_dupMatrix.txt") > 0) "gene_data/$filename"
-            else if (filename.indexOf("_duprateExpDensCurve.txt") > 0) "scatter_curve_data/$filename"
+            else if (filename.indexOf("_duprateExpDensCurve_mqc.txt") > 0) "scatter_curve_data/$filename"
             else if (filename.indexOf("_intercept_slope.txt") > 0) "intercepts_slopes/$filename"
             else "$filename"
         }
