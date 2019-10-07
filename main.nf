@@ -149,7 +149,7 @@ params.saveReference = false
 params.saveTrimmed = false
 //Feature Counts
 params.fcGroupFeatures = 'gene_name'
-params.fcGroupFeaturesType = 'gene_name'
+params.fcGroupFeaturesType = 'gene_biotype'
 params.fcExtraAttributes = 'gene_name'
 //Skip steps
 params.skip_qc = false
