@@ -397,6 +397,7 @@ if(params.aligner == 'star' && !params.star_index && params.fasta){
             --sjdbGTFfile $gtf \\
             --genomeDir star/ \\
             --genomeFastaFiles $fasta \\
+            --limitGenomeGenerateRAM=200000000000
         """
     }
 }
