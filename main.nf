@@ -388,9 +388,7 @@ if(params.aligner == 'star' && !params.star_index && params.fasta){
 
 
         script:
-        def avail_mem = task.memory ? "--limitGenomeGenerateRAM ${task.memory.toBytes()}" : ''
 //        def avail_mem = task.memory ? "--limitGenomeGenerateRAM ${task.memory.toBytes() - 100000000}" : ''
-
         """
         mkdir star
         STAR \\
@@ -399,7 +397,6 @@ if(params.aligner == 'star' && !params.star_index && params.fasta){
             --sjdbGTFfile $gtf \\
             --genomeDir star/ \\
             --genomeFastaFiles $fasta \\
-            $avail_mem
         """
     }
 }
