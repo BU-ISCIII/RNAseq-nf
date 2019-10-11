@@ -18,8 +18,9 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
   * [Gene body coverage](#gene-body-coverage)
   * [Read distribution](#read-distribution)
   * [Junction annotation](#junction-annotation)
-* [dupRadar](#dupradar) v1.12.1 - technical / biological read duplication
 * [Preseq](#preseq) v2.0.3 - library complexity
+* [Picard](#picard) v2.18.27 - Identify duplicate reads
+* [dupRadar](#dupradar) v1.12.1 - technical / biological read duplication
 * [featureCounts](#featurecounts) v - gene counts, biotype counts, rRNA estimation.
 * [StringTie](#stringtie) v1.3.5 - FPKMs for genes and transcripts
 * [edgeR](#edgeR) v3.24.1 - create MDS plot and sample pairwise distance heatmap / dendrogram
@@ -255,28 +256,6 @@ Junction annotation compares detected splice junctions to a reference gene model
 RSeQC documentation: [junction_annotation.py](http://rseqc.sourceforge.net/#junction-annotation-py)
 
 ##Counts
-### dupRadar
-[dupRadar](https://www.bioconductor.org/packages/release/bioc/html/dupRadar.html) is a Bioconductor library for R. It plots the duplication rate against expression (RPKM) for every gene. A good sample with little technical duplication will only show high numbers of duplicates for highly expressed genes. Samples with technical duplication will have high duplication for all genes, irrespective of transcription level.
-
-![dupRadar](images/dupRadar_plot.png)
-> _Credit: [dupRadar documentation](https://www.bioconductor.org/packages/devel/bioc/vignettes/dupRadar/inst/doc/dupRadar.html)_
-
-**Output directory: `06-removeDuplicates`**
-
-* `{sample_id}.markDups.bam`
-* `{sample_id}.markDups.bam.bai`
-* `{sample_id}.markDups_dup_intercept_mqc.txt`
-* `{sample_id}.markDups_duprateExpDensCurve_mqc.tx`
-* `box_plot/{sample_id}.markDups_duprateExpBoxplot.pdf`
-* `gene_data/{sample_id}.markDups_dupMatrix.txt`
-* `histograms/{sample_id}.markDups_expressionHist.pdf`
-* `intercepts_slopes/{sample_id}.markDups_intercept_slope.txt`
-* `metrics/{sample_id}.markDups_metrics.txt`
-* `scatter_plots/{sample_id}.markDups.bam_duprateExpDens.pdf`
-
-
-DupRadar documentation: [dupRadar docs](https://www.bioconductor.org/packages/devel/bioc/vignettes/dupRadar/inst/doc/dupRadar.html)
-
 ### Preseq
 [Preseq](http://smithlabresearch.org/software/preseq/) estimates the complexity of a library, showing how many additional unique reads are sequenced for increasing the total read count. A shallow curve indicates that the library has reached complexity saturation and further sequencing would likely not add further unique reads. The dashed line shows a perfectly complex library where total reads = unique reads.
 
@@ -288,6 +267,38 @@ Note that these are predictive numbers only, not absolute. The MultiQC plot can 
 
 * `{sample_id}.ccurve.txt`
   * This file contains plot values for the complexity curve, plotted in the MultiQC report.
+
+## Picard
+[Picard](https://broadinstitute.github.io/picard/index.html) is a set of command line tools for manipulating high-throughput sequencing (HTS) data. In this case we used it to locate and tag duplicate reads in BAM files.
+
+**Output directory: `06-removeDuplicates/picard`**
+
+* `{sample_id}.markDups.bam`
+* `{sample_id}.markDups.bam.bai`
+* `metrics/{sample_id}.markDups_metrics.txt`
+
+Picard documentation: [Picard docs](https://broadinstitute.github.io/picard/command-line-overview.html)
+
+
+### dupRadar
+[dupRadar](https://www.bioconductor.org/packages/release/bioc/html/dupRadar.html) is a Bioconductor library for R. It plots the duplication rate against expression (RPKM) for every gene. A good sample with little technical duplication will only show high numbers of duplicates for highly expressed genes. Samples with technical duplication will have high duplication for all genes, irrespective of transcription level.
+
+![dupRadar](images/dupRadar_plot.png)
+> _Credit: [dupRadar documentation](https://www.bioconductor.org/packages/devel/bioc/vignettes/dupRadar/inst/doc/dupRadar.html)_
+
+**Output directory: `06-removeDuplicates/dupRadar`**
+
+* `{sample_id}.markDups_dup_intercept_mqc.txt`
+* `{sample_id}.markDups_duprateExpDensCurve_mqc.tx`
+* `box_plot/{sample_id}.markDups_duprateExpBoxplot.pdf`
+* `gene_data/{sample_id}.markDups_dupMatrix.txt`
+* `histograms/{sample_id}.markDups_expressionHist.pdf`
+* `intercepts_slopes/{sample_id}.markDups_intercept_slope.txt`
+* `scatter_plots/{sample_id}.markDups.bam_duprateExpDens.pdf`
+
+
+DupRadar documentation: [dupRadar docs](https://www.bioconductor.org/packages/devel/bioc/vignettes/dupRadar/inst/doc/dupRadar.html)
+
 
 ### featureCounts
 [featureCounts](http://bioinf.wehi.edu.au/featureCounts/) from the subread package summarises the read distribution over genomic features such as genes, exons, promotors, gene bodies, genomic bins and chromosomal locations.
