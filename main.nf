@@ -899,7 +899,7 @@ process preseq {
  */
 process markDuplicates {
     tag "${bam.baseName - '.sorted'}"
-    publishDir "${params.outdir}/06-removeDuplicates", mode: 'copy',
+    publishDir "${params.outdir}/06-removeDuplicates/picard", mode: 'copy',
         saveAs: {filename -> filename.indexOf("_metrics.txt") > 0 ? "metrics/$filename" : "$filename"}
 
     when:
@@ -937,7 +937,7 @@ process markDuplicates {
 process dupradar {
     label 'low_memory'
     tag "${bam_md.baseName - '.sorted.markDups'}"
-    publishDir "${params.outdir}/06-removeDuplicates", mode: 'copy',
+    publishDir "${params.outdir}/06-removeDuplicates/dupRadar", mode: 'copy',
         saveAs: {filename ->
             if (filename.indexOf("_duprateExpDens.pdf") > 0) "scatter_plots/$filename"
             else if (filename.indexOf("_duprateExpBoxplot.pdf") > 0) "box_plots/$filename"
