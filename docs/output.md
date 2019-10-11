@@ -24,6 +24,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 * [featureCounts](#featurecounts) v - gene counts, biotype counts, rRNA estimation.
 * [StringTie](#stringtie) v1.3.5 - FPKMs for genes and transcripts
 * [edgeR](#edgeR) v3.24.1 - create MDS plot and sample pairwise distance heatmap / dendrogram
+* [DESeq2](#deseq2) v1.18.1 - Diferential expression analysis and plots
 * [MultiQC](#multiqc) v1.7 - aggregate report, describing results of the whole pipeline
 
 ## Preprocessing
@@ -361,6 +362,75 @@ StringTie outputs FPKM metrics for genes and transcripts as well as the transcri
   * Heatmap plot showing the euclidian distance between your samples
 * `log2CPM_sample_distances_mqc.csv`
   * Raw data used for heatmap and dendrogram plots.
+
+### Diferential expression with DESeq2
+[DESeq2](https://bioconductor.org/packages/release/bioc/manuals/DESeq2/man/DESeq2.pdf) is a Bioconductor package for R used for RNA-seq data analysis. The script included in the pipeline uses DESeq2 to normalize read counts and create a heatmap / dendrogram showing pairwise euclidean distance (sample similarity). It also creates other plots to evaluate the sample dispersion. It also provides PCA plots to evaluet sample grouping.
+
+**MA plot**
+![MAPlot](images/ma_plot.png)
+
+**Sample to sample heatmap**
+![heatmap_sampletosample](images/sample_to_sample.png)
+
+**PCA plot**
+![PCA](images/PCA_plot.png)
+
+**Normalized Boxplot**
+![Boxplot_norm](images/boxplot.jpg)
+
+**Cook Boxplot**
+![Boxplot_cook](images/cooks_boxplot.png)
+
+**Dispersion Estimate**
+![Disp_calc](images/disp_calc.png)
+
+**Pvalue test histogram**
+![Disp_calc](images/pvalue_hist.png)
+
+**Top20 genes heatmap**
+![Top20_Heatmap](images/heatmap_top20.png)
+
+**Hierarchical clustering**
+![Hclust](images/hclust.png)
+
+**Differential expression heatmap**
+![DE_heatmap](images/rgb_heatmap.png)
+
+* `{condition1}vs{condition2}.txt`
+  * Comparative table with the differential expression of two conditions.
+* `maPlot_all.pdf`
+  * MA plot of the DESeq analysis results for all the samples
+* `maPlots_per_comparison.pdf`
+  * PDF file with the MA plots separated by the different comparisons of differential expression
+* `heatmap_sample_to_sample.pdf`
+  * Heatmap with the euclidean distance between samples.
+* `plotPCA.pdf`
+  * PCA plot of the samples for the rlog and the vsd.
+      * rlog refers to the regularized log transformation, which transforms the count data to the log2 scale in a way which minimizes differences between samples for rows with small counts, and which normalizes with respect to library size.
+      * vsd refers to variance stabilizing transformation (VST), which calculates a variance stabilizing transformation (VST) from the fitted dispersion-mean relation(s) and then transforms the count data (normalized by division by the size factors or normalization factors), yielding a matrix of values which are now approximately homoskedastic (having constant variance along the range of mean values). The transformation also normalizes with respect to library size.
+* `boxplot.pdf`
+  * PDF file with the box_plots
+      * Box plot of the normalized Counts
+      * Box plot of the counts cook distances to see if one sample is consistently higher than others.
+* `plotDispersions.pdf`
+  * PDF file with plots to analyze the dispersion of the samples
+      * Dispersion calc is the per-gene dispersion estimate together with the fitted mean-dispersion relationship.
+      * Histogram with the test of the differential expression pvalues
+* `heatmapCount_top20.pdf`
+  * Heat map of the top 20 genes with the higher normalized mean count.
+* `heatmapCount_top20_no2samp.pdf`
+  * Heat map of the top 20 genes with the higher normalized mean count excluding the samples Clon10 and ClonIIIp
+* `FPKM_higher_1000.pdf`
+  * PDF file with the hierarchical clustering of the samples based in the genes with an FPKM higher than 1000
+* `FPKM_higher_1000_no2samp.pdf`
+  * PDF file with the hierarchical clustering of the samples based in the genes with an FPKM higher than 1000
+* `heatmapCounts_padj_0.01.pdf`
+  * Heat map of the differential expression cosnidering the genes with an adjusted pvalue smaller than 0.01
+      * KGN vs WT
+      * KGN vs CRSPR
+      * KGN vs NULL
+* `top20_KGN_WT_heatmap.pdf`
+  * Heatmap with the differential expression between KGN and WT with the top20 genes with a lower adjusted pvalue.
 
 ##Final reports
 ### MultiQC
