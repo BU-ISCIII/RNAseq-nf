@@ -21,10 +21,10 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 * [Preseq](#preseq) v2.0.3 - library complexity
 * [Picard](#picard) v2.18.27 - Identify duplicate reads
 * [dupRadar](#dupradar) v1.12.1 - technical / biological read duplication
-* [featureCounts](#featurecounts) v - gene counts, biotype counts, rRNA estimation.
+* [Subread](#featurecounts) v1.6.4 - gene counts, biotype counts, rRNA estimation.
 * [StringTie](#stringtie) v1.3.5 - FPKMs for genes and transcripts
-* [edgeR](#edgeR) v3.24.1 - create MDS plot and sample pairwise distance heatmap / dendrogram
-* [DESeq2](#deseq2) v1.18.1 - Diferential expression analysis and plots
+* [edgeR](#edger) v3.24.1 - create MDS plot and sample pairwise distance heatmap / dendrogram
+* [DESeq2](#deseq) v1.18.1 - Diferential expression analysis and plots
 * [MultiQC](#multiqc) v1.7 - aggregate report, describing results of the whole pipeline
 
 ## Preprocessing
@@ -42,24 +42,25 @@ For further reading and documentation see the [FastQC help](http://www.bioinform
 * `zips/{sample_id}_R[12]_fastqc.zip`
   * zip file containing the FastQC report, tab-delimited data file and plot images
 
-  ### Trimming
-  [Trimmomatic](http://www.usadellab.org/cms/?page=trimmomatic) is used for removal of adapter contamination and trimming of low quality regions.
-  Parameters included for trimming are:
-  -  Nucleotides with phred quality < 10 in 3'end.
-  -  Mean phred quality < 20 in a 4 nucleotide window.
-  -  Read lenght < 50
+### Trimming
+[Trimmomatic](http://www.usadellab.org/cms/?page=trimmomatic) is used for removal of adapter contamination and trimming of low quality regions.
+Parameters included for trimming are:
+-  Nucleotides with phred quality < 10 in 3'end.
+-  Mean phred quality < 20 in a 4 nucleotide window.
+-  Read lenght < 50
 
-  MultiQC reports the percentage of bases removed by trimming in bar plot showing percentage or reads trimmed in forward and reverse.
+MultiQC reports the percentage of bases removed by trimming in bar plot showing percentage or reads trimmed in forward and reverse.
 
-  **Results directory: `02-preprocessing`**
-  - Files:
-     - `trimmed/{sample_id}_filtered_R[12].fastq.gz`: contains high quality reads with both forward and reverse tags surviving.
-     - `trimmed/{sample_id}_unpaired_R[12].fastq.gz`: contains high quality reads with only forward or reverse tags surviving.
-     - `FastQC/{sample_id}_filtered_R[12].fastqc.html`: html report of the trimmed reads.
-     - `FastQC/{sample_id}_filtered_R[12].fastqc.html.zip`: zip compression of above file.
-     - `logs/{sample_id}.log`: log file of the trimming process.
+**Results directory: `02-preprocessing`**
+- Files:
+   - `trimmed/{sample_id}_filtered_R[12].fastq.gz`: contains high quality reads with both forward and reverse tags surviving.
+   - `trimmed/{sample_id}_unpaired_R[12].fastq.gz`: contains high quality reads with only forward or reverse tags surviving.
+   - `FastQC/{sample_id}_filtered_R[12].fastqc.html`: html report of the trimmed reads.
+   - `FastQC/{sample_id}_filtered_R[12].fastqc.html.zip`: zip compression of above file.
+   - `logs/{sample_id}.log`: log file of the trimming process.
 
-  **NOTE:** Trimmed reads are not delivered to the researcher by default due to disk space issues. If you are interesested in using them, please contact us and we will add them to your delivery.
+**NOTE:** Trimmed reads are not delivered to the researcher by default due to disk space issues. If you are interesested in using them, please contact us and we will add them to your delivery.
+
 ##Alignment
 ### STAR
 STAR is a read aligner designed for RNA sequencing.  STAR stands for Spliced Transcripts Alignment to a Reference, it produces results comparable to TopHat (the aligned previously used by NGI for RNA alignments) but is much faster.
