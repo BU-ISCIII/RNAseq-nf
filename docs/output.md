@@ -365,7 +365,7 @@ Sample correlation with edgeR. [edgeR](https://bioconductor.org/packages/release
 * `log2CPM_sample_distances_mqc.csv`
   * Raw data used for heatmap and dendrogram plots.
 
-###DESeq2
+### DESeq2
 Diferential expression analysis with DESeq2. [DESeq2](https://bioconductor.org/packages/release/bioc/manuals/DESeq2/man/DESeq2.pdf) is a Bioconductor package for R used for RNA-seq data analysis. The script included in the pipeline uses DESeq2 to normalize read counts and create a heatmap / dendrogram showing pairwise euclidean distance (sample similarity). It also creates other plots to evaluate the sample dispersion. It also provides PCA plots to evaluet sample grouping.
 
 **MA plot**
