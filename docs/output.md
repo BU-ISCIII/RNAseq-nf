@@ -24,7 +24,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 * [Subread](#featurecounts) v1.6.4 - gene counts, biotype counts, rRNA estimation.
 * [StringTie](#stringtie) v1.3.5 - FPKMs for genes and transcripts
 * [edgeR](#edger) v3.24.1 - create MDS plot and sample pairwise distance heatmap / dendrogram
-* [DESeq2](#deseq) v1.18.1 - Diferential expression analysis and plots
+* [DESeq2](#deseq2) v1.18.1 - Diferential expression analysis and plots
 * [MultiQC](#multiqc) v1.7 - aggregate report, describing results of the whole pipeline
 
 ## Preprocessing
@@ -270,7 +270,7 @@ Note that these are predictive numbers only, not absolute. The MultiQC plot can 
 * `{sample_id}.ccurve.txt`
   * This file contains plot values for the complexity curve, plotted in the MultiQC report.
 
-## Picard
+### Picard
 [Picard](https://broadinstitute.github.io/picard/index.html) is a set of command line tools for manipulating high-throughput sequencing (HTS) data. In this case we used it to locate and tag duplicate reads in BAM files.
 
 **Output directory: `06-removeDuplicates/picard`**
@@ -337,9 +337,10 @@ StringTie outputs FPKM metrics for genes and transcripts as well as the transcri
 * `cov_refs/{sample_id}.cov_refs.gtf`
   * This `.gtf` file contains the transcripts that are fully covered by reads.
 
-##Counts analysis and Differential Expression (DE)
-### Sample Correlation with edgeR
-[edgeR](https://bioconductor.org/packages/release/bioc/html/edgeR.html) is a Bioconductor package for R used for RNA-seq data analysis. The script included in the pipeline uses edgeR to normalise read counts and create a heatmap / dendrogram showing pairwise euclidean distance (sample similarity). It also creates a 2D MDS scatter plot showing sample grouping. These help to show sample similarity and can reveal batch effects and sample groupings.
+## Sample correlation and Differential Expression (DE)
+
+### edgeR
+Sample correlation with edgeR. [edgeR](https://bioconductor.org/packages/release/bioc/html/edgeR.html) is a Bioconductor package for R used for RNA-seq data analysis. The script included in the pipeline uses edgeR to normalise read counts and create a heatmap / dendrogram showing pairwise euclidean distance (sample similarity). It also creates a 2D MDS scatter plot showing sample grouping. These help to show sample similarity and can reveal batch effects and sample groupings.
 
 **Heatmap:**
 
@@ -364,8 +365,8 @@ StringTie outputs FPKM metrics for genes and transcripts as well as the transcri
 * `log2CPM_sample_distances_mqc.csv`
   * Raw data used for heatmap and dendrogram plots.
 
-### Diferential expression with DESeq2
-[DESeq2](https://bioconductor.org/packages/release/bioc/manuals/DESeq2/man/DESeq2.pdf) is a Bioconductor package for R used for RNA-seq data analysis. The script included in the pipeline uses DESeq2 to normalize read counts and create a heatmap / dendrogram showing pairwise euclidean distance (sample similarity). It also creates other plots to evaluate the sample dispersion. It also provides PCA plots to evaluet sample grouping.
+###DESeq2
+Diferential expression analysis with DESeq2. [DESeq2](https://bioconductor.org/packages/release/bioc/manuals/DESeq2/man/DESeq2.pdf) is a Bioconductor package for R used for RNA-seq data analysis. The script included in the pipeline uses DESeq2 to normalize read counts and create a heatmap / dendrogram showing pairwise euclidean distance (sample similarity). It also creates other plots to evaluate the sample dispersion. It also provides PCA plots to evaluet sample grouping.
 
 **MA plot**
 ![MAPlot](images/ma_plot.png)
@@ -433,7 +434,7 @@ StringTie outputs FPKM metrics for genes and transcripts as well as the transcri
 * `top20_KGN_WT_heatmap.pdf`
   * Heatmap with the differential expression between KGN and WT with the top20 genes with a lower adjusted pvalue.
 
-##Final reports
+## Final reports
 ### MultiQC
 [MultiQC](http://multiqc.info) is a visualisation tool that generates a single HTML report summarising all samples in your project. Most of the pipeline QC results are visualised in the report and further statistics are available in within the report data directory.
 
