@@ -210,15 +210,13 @@ This plot will not be generated for single-end data. Very short inner distances 
 RSeQC documentation: [inner_distance.py](http://rseqc.sourceforge.net/#inner-distance-py)
 
 #### Gene body coverage
-**NB:** In nfcore/rnaseq we subsample this to 1 Million reads. This speeds up this task significantly and has no to little effect on the results.
+This script calculates the reads coverage across gene bodies. This makes it easy to identify 3' or 5' skew in libraries. A skew towards increased 3' coverage can happen in degraded samples prepared with poly-A selection.
 
 **Output: `geneBodyCoverage/`**
 
-* `{sample_id}.geneBodyCoverage.curves.pdf`
-* `rscripts/{sample_id}.geneBodyCoverage.r`
-* `data/{sample_id}.geneBodyCoverage.txt`
+* `geneBody_coverage.geneBodyCoverage.curves.pdf`
+* `geneBody_coverage.geneBodyCoverage.heatMap.pdf`
 
-This script calculates the reads coverage across gene bodies. This makes it easy to identify 3' or 5' skew in libraries. A skew towards increased 3' coverage can happen in degraded samples prepared with poly-A selection.
 
 A typical set of libraries with little or no bias will look as follows:
 
@@ -427,7 +425,7 @@ Diferential expression analysis with DESeq2. [DESeq2](https://bioconductor.org/p
 * `FPKM_higher_1000_no2samp.pdf`
   * PDF file with the hierarchical clustering of the samples based in the genes with an FPKM higher than 1000
 * `heatmapCounts_padj_0.01.pdf`
-  * Heat map of the differential expression considering the genes with an adjusted pvalue smaller than 0.01
+  * Heat map of the differential expression considering the genes with an adjusted pvalue smaller than 0.01 for each of the following comparatives:
       * KGN vs WT
       * KGN vs CRSPR
       * KGN vs NULL
