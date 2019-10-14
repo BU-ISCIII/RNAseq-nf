@@ -303,7 +303,7 @@ DupRadar documentation: [dupRadar docs](https://www.bioconductor.org/packages/de
 
 
 ### featureCounts
-[featureCounts](http://bioinf.wehi.edu.au/featureCounts/) from the subread package summarises the read distribution over genomic features such as genes, exons, promotors, gene bodies, genomic bins and chromosomal locations.
+[featureCounts](http://bioinf.wehi.edu.au/featureCounts/) from the subread package summarizes the read distribution over genomic features such as genes, exons, promotors, gene bodies, genomic bins and chromosomal locations.
 RNA reads should mostly overlap genes, so be assigned.
 
 ![featureCounts](images/featureCounts_assignment_plot.png)
@@ -340,7 +340,7 @@ StringTie outputs FPKM metrics for genes and transcripts as well as the transcri
 ## Sample correlation and Differential Expression (DE)
 
 ### edgeR
-Sample correlation with edgeR. [edgeR](https://bioconductor.org/packages/release/bioc/html/edgeR.html) is a Bioconductor package for R used for RNA-seq data analysis. The script included in the pipeline uses edgeR to normalise read counts and create a heatmap / dendrogram showing pairwise euclidean distance (sample similarity). It also creates a 2D MDS scatter plot showing sample grouping. These help to show sample similarity and can reveal batch effects and sample groupings.
+Sample correlation with edgeR. [edgeR](https://bioconductor.org/packages/release/bioc/html/edgeR.html) is a Bioconductor package for R used for RNA-seq data analysis. The script included in the pipeline uses edgeR to normalize read counts and create a heatmap / dendrogram showing pairwise euclidean distance (sample similarity). It also creates a 2D MDS scatter plot showing sample grouping. These help to show sample similarity and can reveal batch effects and sample groupings.
 
 **Heatmap:**
 
@@ -366,7 +366,7 @@ Sample correlation with edgeR. [edgeR](https://bioconductor.org/packages/release
   * Raw data used for heatmap and dendrogram plots.
 
 ### DESeq2
-Diferential expression analysis with DESeq2. [DESeq2](https://bioconductor.org/packages/release/bioc/manuals/DESeq2/man/DESeq2.pdf) is a Bioconductor package for R used for RNA-seq data analysis. The script included in the pipeline uses DESeq2 to normalize read counts and create a heatmap / dendrogram showing pairwise euclidean distance (sample similarity). It also creates other plots to evaluate the sample dispersion. It also provides PCA plots to evaluet sample grouping.
+Diferential expression analysis with DESeq2. [DESeq2](https://bioconductor.org/packages/release/bioc/manuals/DESeq2/man/DESeq2.pdf) is a Bioconductor package for R used for RNA-seq data analysis. The script included in the pipeline uses DESeq2 to normalize read counts and create a heatmap / dendrogram showing pairwise euclidean distance (sample similarity). It also creates other plots to evaluate the sample dispersion. It also provides PCA plots to evaluate sample grouping.
 
 **MA plot**
 ![MAPlot](images/ma_plot.png)
@@ -427,7 +427,7 @@ Diferential expression analysis with DESeq2. [DESeq2](https://bioconductor.org/p
 * `FPKM_higher_1000_no2samp.pdf`
   * PDF file with the hierarchical clustering of the samples based in the genes with an FPKM higher than 1000
 * `heatmapCounts_padj_0.01.pdf`
-  * Heat map of the differential expression cosnidering the genes with an adjusted pvalue smaller than 0.01
+  * Heat map of the differential expression considering the genes with an adjusted pvalue smaller than 0.01
       * KGN vs WT
       * KGN vs CRSPR
       * KGN vs NULL
@@ -436,7 +436,7 @@ Diferential expression analysis with DESeq2. [DESeq2](https://bioconductor.org/p
 
 ## Final reports
 ### MultiQC
-[MultiQC](http://multiqc.info) is a visualisation tool that generates a single HTML report summarising all samples in your project. Most of the pipeline QC results are visualised in the report and further statistics are available in within the report data directory.
+[MultiQC](http://multiqc.info) is a visualization tool that generates a single HTML report summarizing all samples in your project. Most of the pipeline QC results are visualized in the report and further statistics are available in within the report data directory.
 
 The pipeline has special steps which allow the software versions used to be reported in the MultiQC output for future traceability.
 
