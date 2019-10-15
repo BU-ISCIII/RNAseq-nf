@@ -771,6 +771,7 @@ process rseqc {
             else if (filename.indexOf("junction_annotation_log.txt") > 0)       "junction_annotation/$filename"
             else if (filename.indexOf("splice_events.pdf") > 0)                 "junction_annotation/events/$filename"
             else if (filename.indexOf("splice_junction.pdf") > 0)               "junction_annotation/junctions/$filename"
+            else if (filename.indexOf("junction.xls") > 0)                      "junction_annotation/data/$filename"
             else if (filename.indexOf("junctionSaturation_plot.pdf") > 0)       "junction_saturation/$filename"
             else if (filename.indexOf("junctionSaturation_plot.r") > 0)         "junction_saturation/rscripts/$filename"
             else filename
@@ -1034,7 +1035,7 @@ process merge_featureCounts {
     def single = input_files instanceof Path ? 1 : input_files.size()
     def merge = (single == 1) ? 'cat' : 'csvtk join -t -f "Geneid,Start,Length,End,Chr,Strand,gene_name"'
     """
-    $merge $input_files | csvtk cut -t -f "-Start,-Chr,-End,-Length,-Strand" | sed 's/.markDups.bam//g' > merged_gene_counts.txt
+    $merge $input_files | csvtk cut -t -f "-Start,-Chr,-End,-Length,-Strand" | sed 's/.markDups.bam//g' | sed 's/\_filteredAligned.sortedByCoord.out.bam//g' > merged_gene_counts.txt
     """
 }
 
