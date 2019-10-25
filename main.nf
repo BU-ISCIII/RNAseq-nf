@@ -633,7 +633,7 @@ if(params.aligner == 'star'){
         file "*Log.out" into star_log
         file "where_are_my_files.txt"
         file "${prefix}Aligned.sortedByCoord.out.bam.bai" into bam_index_rseqc, bam_index_genebody
-        file '*.command.log' into star_log
+        file '*.command.log' into star_command_log
         file '*.command.sh' into star_sh
         file '*.command.err' into star_err
 
@@ -872,7 +872,7 @@ process genebody_coverage {
     !params.skip_qc && !params.skip_genebody_coverage
 
     input:
-    file bam from bam_forSubsamp
+    file bam from bam_forSubsamp.collect()
     file bed12 from bed_genebody_coverage.collect()
 
     output:
@@ -901,8 +901,8 @@ process genebody_coverage {
  */
 process preseq {
     tag "${bam_preseq.baseName - '.sorted'}"
-    publishDir "${params.outdir}/05-preseq", mode: 'copy'
-    saveAs: {filename ->
+    publishDir "${params.outdir}/05-preseq", mode: 'copy',
+      saveAs: {filename ->
         if (filename.indexOf(".command.out") > 0)                      "logs/$filename"
         else if (filename.indexOf(".command.sh") > 0)                  "logs/$filename"
         else if (filename.indexOf(".command.err") > 0)                 "logs/$filename"
@@ -1093,7 +1093,7 @@ process merge_featureCounts {
     file input_files from featureCounts_to_merge.collect()
 
     output:
-    file 'merged_gene_counts.txt'
+    file 'merged_gene_counts.txt' into merged_counts
 
     script:
     //if we only have 1 file, just use cat and pipe output to csvtk. Else join all files first, and then remove unwanted column names.
@@ -1126,7 +1126,6 @@ process stringtieFPKM {
     file "${prefix}_transcripts.gtf"
     file "${prefix}.gene_abund.txt"
     file "${prefix}.cov_refs.gtf"
-    file ".command.log" into stringtie_log
     file "${prefix}_ballgown"
     file '*.command.log' into stringtie_log
     file '*.command.sh' into stringtie_sh
@@ -1162,8 +1161,8 @@ process stringtieFPKM {
 process sample_correlation {
     label 'low_memory'
     tag "${input_files[0].toString() - '.sorted_gene.featureCounts.txt' - 'Aligned'}"
-    publishDir "${params.outdir}/09-sample_correlation", mode: 'copy'
-    saveAs: {filename ->
+    publishDir "${params.outdir}/09-sample_correlation", mode: 'copy',
+      saveAs: {filename ->
         if (filename.indexOf(".command.out") > 0)                      "logs/$filename"
         else if (filename.indexOf(".command.sh") > 0)                  "logs/$filename"
         else if (filename.indexOf(".command.err") > 0)                 "logs/$filename"
@@ -1202,8 +1201,8 @@ process sample_correlation {
  * STEP 12 MultiQC
  */
 process multiqc {
-    publishDir "${params.outdir}/99-stats/MultiQC", mode: 'copy'
-    saveAs: {filename ->
+    publishDir "${params.outdir}/99-stats/MultiQC", mode: 'copy',
+      saveAs: {filename ->
         if (filename.indexOf(".command.out") > 0)                      "logs/$filename"
         else if (filename.indexOf(".command.sh") > 0)                  "logs/$filename"
         else if (filename.indexOf(".command.err") > 0)                 "logs/$filename"
