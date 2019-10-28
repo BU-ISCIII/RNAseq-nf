@@ -385,9 +385,9 @@ if(params.aligner == 'star' && !params.star_index && params.fasta){
 
         output:
         file "star" into star_index
-        file '*.command.out' into star_index_log
-        file '*.command.sh' into star_index_sh
-        file '*.command.err' into star_index_err
+        file '.command.out' into star_index_log
+        file '.command.sh' into star_index_sh
+        file '.command.err' into star_index_err
 
         script:
 //        def avail_mem = task.memory ? "--limitGenomeGenerateRAM ${task.memory.toBytes() - 100000000}" : ''
