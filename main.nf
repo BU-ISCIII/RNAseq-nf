@@ -862,7 +862,7 @@ process genebody_coverage {
             else if (filename.indexOf("geneBodyCoverage.r") > 0)           "geneBodyCoverage/rscripts/$filename"
             else if (filename.indexOf("geneBodyCoverage.txt") > 0)         "geneBodyCoverage/data/$filename"
             else if (filename.indexOf("log.txt") > -1) false
-            else if (filename.indexOf(".command.out") > 0)                 "logs/$filename"
+            else if (filename.indexOf(".command.log") > 0)                 "logs/$filename"
             else if (filename.indexOf(".command.sh") > 0)                  "logs/$filename"
             else if (filename.indexOf(".command.err") > 0)                 "logs/$filename"
             else filename
@@ -903,7 +903,7 @@ process preseq {
     tag "${bam_preseq.baseName - '.sorted'}"
     publishDir "${params.outdir}/05-preseq", mode: 'copy',
       saveAs: {filename ->
-        if (filename.indexOf(".command.out") > 0)                      "logs/$filename"
+        if (filename.indexOf(".command.log") > 0)                      "logs/$filename"
         else if (filename.indexOf(".command.sh") > 0)                  "logs/$filename"
         else if (filename.indexOf(".command.err") > 0)                 "logs/$filename"
         else filename
@@ -941,7 +941,7 @@ process markDuplicates {
         if (filename.indexOf("_metrics.txt") > 0)                      "metrics/$filename"
         else if (filename.indexOf(".command.sh") > 0)                  "logs/$filename"
         else if (filename.indexOf(".command.err") > 0)                 "logs/$filename"
-        else if (filename.indexOf(".command.out") > 0)                 "logs/$filename"
+        else if (filename.indexOf(".command.log") > 0)                 "logs/$filename"
     }
     when:
     !params.skip_qc && !params.skip_dupradar
@@ -992,7 +992,7 @@ process dupradar {
             else if (filename.indexOf("_dupMatrix.txt") > 0) "gene_data/$filename"
             else if (filename.indexOf("_duprateExpDensCurve.txt") > 0) "scatter_curve_data/$filename"
             else if (filename.indexOf("_intercept_slope.txt") > 0) "intercepts_slopes/$filename"
-            else if (filename.indexOf(".command.out") > 0) "logs/$filename"
+            else if (filename.indexOf(".command.log") > 0) "logs/$filename"
             else if (filename.indexOf(".command.sh") > 0) "logs/$filename"
             else if (filename.indexOf(".command.err") > 0) "logs/$filename"
             else "$filename"
@@ -1042,7 +1042,7 @@ process featureCounts {
             if (filename.indexOf("biotype_counts") > 0) "biotype_counts/$filename"
             else if (filename.indexOf("_gene.featureCounts.txt.summary") > 0) "gene_count_summaries/$filename"
             else if (filename.indexOf("_gene.featureCounts.txt") > 0) "gene_counts/$filename"
-            else if (filename.indexOf(".command.out") > 0) "logs/$filename"
+            else if (filename.indexOf(".command.log") > 0) "logs/$filename"
             else if (filename.indexOf(".command.sh") > 0) "logs/$filename"
             else if (filename.indexOf(".command.err") > 0) "logs/$filename"
             else "$filename"
@@ -1115,6 +1115,9 @@ process stringtieFPKM {
             if (filename.indexOf("transcripts.gtf") > 0) "transcripts/$filename"
             else if (filename.indexOf("cov_refs.gtf") > 0) "cov_refs/$filename"
             else if (filename.indexOf("ballgown") > 0) "ballgown/$filename"
+            else if (filename.indexOf(".command.sh") > 0)                  "logs/$filename"
+            else if (filename.indexOf(".command.err") > 0)                 "logs/$filename"
+            else if (filename.indexOf(".command.log") > 0)                 "logs/$filename"
             else "$filename"
         }
 
@@ -1163,7 +1166,7 @@ process sample_correlation {
     tag "${input_files[0].toString() - '.sorted_gene.featureCounts.txt' - 'Aligned'}"
     publishDir "${params.outdir}/09-sample_correlation", mode: 'copy',
       saveAs: {filename ->
-        if (filename.indexOf(".command.out") > 0)                      "logs/$filename"
+        if (filename.indexOf(".command.log") > 0)                      "logs/$filename"
         else if (filename.indexOf(".command.sh") > 0)                  "logs/$filename"
         else if (filename.indexOf(".command.err") > 0)                 "logs/$filename"
         else filename
@@ -1203,7 +1206,7 @@ process sample_correlation {
 process multiqc {
     publishDir "${params.outdir}/99-stats/MultiQC", mode: 'copy',
       saveAs: {filename ->
-        if (filename.indexOf(".command.out") > 0)                      "logs/$filename"
+        if (filename.indexOf(".command.log") > 0)                      "logs/$filename"
         else if (filename.indexOf(".command.sh") > 0)                  "logs/$filename"
         else if (filename.indexOf(".command.err") > 0)                 "logs/$filename"
         else filename
