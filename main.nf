@@ -1035,7 +1035,7 @@ process merge_featureCounts {
     def single = input_files instanceof Path ? 1 : input_files.size()
     def merge = (single == 1) ? 'cat' : 'csvtk join -t -f "Geneid,Start,Length,End,Chr,Strand,gene_name"'
     """
-    $merge $input_files | csvtk cut -t -f "-Start,-Chr,-End,-Length,-Strand" | sed 's/.markDups.bam//g' | sed 's/\_filteredAligned.sortedByCoord.out.bam//g' > merged_gene_counts.txt
+    $merge $input_files | csvtk cut -t -f "-Start,-Chr,-End,-Length,-Strand" | sed 's/.markDups.bam//g' | sed 's/_filteredAligned.sortedByCoord.out.bam//g' > merged_gene_counts.txt
     """
 }
 
