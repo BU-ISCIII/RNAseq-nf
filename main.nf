@@ -385,9 +385,7 @@ if(params.aligner == 'star' && !params.star_index && params.fasta){
 
         output:
         file "star" into star_index
-        file '.command.out' into star_index_log
-        file '.command.sh' into star_index_sh
-        file '.command.err' into star_index_err
+
 
         script:
 //        def avail_mem = task.memory ? "--limitGenomeGenerateRAM ${task.memory.toBytes() - 100000000}" : ''
@@ -489,8 +487,6 @@ if(!params.bed12){
 
         output:
         file "${gtf.baseName}.bed" into bed_rseqc, bed_genebody_coverage
-        file '.command.log' into bed12_log
-        file '.command.sh' into bed12_sh
 
         script: // This script is bundled with the pipeline, in nfcore/rnaseq/bin/
         """
@@ -506,12 +502,7 @@ if(!params.bed12){
 process fastqc {
     tag "$name"
     publishDir "${params.outdir}/01-fastqc", mode: 'copy',
-        saveAs: {filename ->
-        if (filename.indexOf(".zip") > 0) "zips/$filename"
-        else if (filename.indexOf(".command.out") > 0) "logs/$filename"
-        else if (filename.indexOf(".command.sh") > 0) "logs/$filename"
-        else if (filename.indexOf(".command.err") > 0) "logs/$filename"
-        }
+        saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
 
     when:
     !params.skip_qc && !params.skip_fastqc
@@ -521,16 +512,10 @@ process fastqc {
 
     output:
     file "*_fastqc.{zip,html}" into fastqc_results
-    file '*.command.out' into fastq_out
-    file '*.command.sh' into fastq_sh
-    file '*.command.err' into fastq_err
 
     script:
     """
     fastqc -q $reads
-    mv .command.out ${name}.command.out
-    mv .command.sh ${name}.command.sh
-    mv .command.err ${name}.command.err
     """
 }
 
@@ -546,9 +531,6 @@ process trimming {
                 if (filename.indexOf("_fastqc") > 0) "FastQC/$filename"
                 else if (filename.indexOf(".log") > 0) "logs/$filename"
                 else if (params.saveTrimmed && filename.indexOf(".fastq.gz")) "trimmed/$filename"
-                else if (filename.indexOf(".command.out") > 0) "logs/$filename"
-                else if (filename.indexOf(".command.sh") > 0) "logs/$filename"
-                else if (filename.indexOf(".command.err") > 0) "logs/$filename"
                 else null
         }
 
@@ -561,9 +543,6 @@ process trimming {
     file '*_unpaired_*.fastq.gz' into trimmed_unpaired_reads, trimmed_unpaired_reads_picard
     file '*_fastqc.{zip,html}' into trimmomatic_fastqc_reports, trimmomatic_fastqc_reports_picard
     file '*.log' into trimmomatic_results, trimmomatic_results_picard
-    file '*.command.log' into trimming_log
-    file '*.command.sh' into trimming_sh
-    file '*.command.err' into trimming_err
 
 
     script:
@@ -572,9 +551,6 @@ process trimming {
     java -jar $TRIMMOMATIC_PATH/trimmomatic-0.33.jar PE -threads 1 -phred33 $reads $prefix"_filtered_R1.fastq" $prefix"_unpaired_R1.fastq" $prefix"_filtered_R2.fastq" $prefix"_unpaired_R2.fastq" ILLUMINACLIP:${params.trimmomatic_adapters_file}:${params.trimmomatic_adapters_parameters} SLIDINGWINDOW:${params.trimmomatic_window_length}:${params.trimmomatic_window_value} MINLEN:${params.trimmomatic_mininum_length} 2> ${name}.log
     gzip *.fastq
     fastqc -q *_filtered_*.fastq.gz
-    mv .command.log ${name}.command.log
-    mv .command.sh ${name}.command.sh
-    mv .command.err ${name}.command.err
     """
 }
 
@@ -612,9 +588,6 @@ if(params.aligner == 'star'){
                 if (filename.indexOf(".bam") == -1) "logs/$filename"
                 else if (!params.saveAlignedIntermediates && filename == "where_are_my_files.txt") filename
                 else if (params.saveAlignedIntermediates && filename != "where_are_my_files.txt") filename
-                else if (filename.indexOf(".command.out") > 0) "logs/$filename"
-                else if (filename.indexOf(".command.sh") > 0) "logs/$filename"
-                else if (filename.indexOf(".command.err") > 0) "logs/$filename"
                 else null
             }
         cpus '20'
@@ -633,9 +606,6 @@ if(params.aligner == 'star'){
         file "*Log.out" into star_log
         file "where_are_my_files.txt"
         file "${prefix}Aligned.sortedByCoord.out.bam.bai" into bam_index_rseqc, bam_index_genebody
-        file '*.command.log' into star_command_log
-        file '*.command.sh' into star_sh
-        file '*.command.err' into star_err
 
         script:
         prefix = reads[0].toString() - ~/(_R1)?(_filtered_)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
@@ -655,9 +625,6 @@ if(params.aligner == 'star'){
             --outFileNamePrefix $prefix $seqCenter
 
         samtools index ${prefix}Aligned.sortedByCoord.out.bam
-        mv .command.log ${prefix}.command.log
-        mv .command.sh ${prefix}.command.sh
-        mv .command.err ${prefix}.command.err
         """
     }
     // Filter removes all 'aligned' channels that fail the check
@@ -807,9 +774,6 @@ process rseqc {
             else if (filename.indexOf("junction.xls") > 0)                      "junction_annotation/data/$filename"
             else if (filename.indexOf("junctionSaturation_plot.pdf") > 0)       "junction_saturation/$filename"
             else if (filename.indexOf("junctionSaturation_plot.r") > 0)         "junction_saturation/rscripts/$filename"
-            else if (filename.indexOf(".command.out") > 0)                      "logs/$filename"
-            else if (filename.indexOf(".command.sh") > 0)                       "logs/$filename"
-            else if (filename.indexOf(".command.err") > 0)                      "logs/$filename"
             else filename
         }
 
@@ -823,9 +787,6 @@ process rseqc {
 
     output:
     file "*.{txt,pdf,r,xls}" into rseqc_results
-    file '*.command.log' into rseqc_log
-    file '*.command.sh' into rseqc_sh
-    file '*.command.err' into rseqc_err
 
     script:
     prefix = bam_rseqc.baseName - '_filteredAligned.sortedByCoord.out'
@@ -843,12 +804,35 @@ process rseqc {
     inner_distance.py -i $bam_rseqc -o ${prefix} -r $bed12
     read_distribution.py -i $bam_rseqc -r $bed12 > ${prefix}.read_distribution.txt
     read_duplication.py -i $bam_rseqc -o ${prefix}.read_duplication
-    mv .command.log ${prefix}.command.log
-    mv .command.sh ${prefix}.command.sh
-    mv .command.err ${prefix}.command.err
     """
 }
 
+/*
+ * Step 4.1 Subsample the BAM files if necessary
+
+bam_forSubsamp
+    .filter { it.size() > params.subsampFilesizeThreshold }
+    .map { [it, params.subsampFilesizeThreshold / it.size() ] }
+    .set{ bam_forSubsampFiltered }
+bam_skipSubsamp
+    .filter { it.size() <= params.subsampFilesizeThreshold }
+    .set{ bam_skipSubsampFiltered }
+
+process bam_subsample {
+    tag "${bam.baseName - '.sorted'}"
+
+    input:
+    set file(bam), val(fraction) from bam_forSubsampFiltered
+
+    output:
+    file "*_subsamp.bam" into bam_subsampled
+
+    script:
+    """
+    samtools view -s $fraction -b $bam | samtools sort -o ${bam.baseName}_subsamp.bam
+    """
+}
+ */
 
 /*
  * Step 4.2 Rseqc genebody_coverage
@@ -862,9 +846,6 @@ process genebody_coverage {
             else if (filename.indexOf("geneBodyCoverage.r") > 0)           "geneBodyCoverage/rscripts/$filename"
             else if (filename.indexOf("geneBodyCoverage.txt") > 0)         "geneBodyCoverage/data/$filename"
             else if (filename.indexOf("log.txt") > -1) false
-            else if (filename.indexOf(".command.log") > 0)                 "logs/$filename"
-            else if (filename.indexOf(".command.sh") > 0)                  "logs/$filename"
-            else if (filename.indexOf(".command.err") > 0)                 "logs/$filename"
             else filename
         }
 
@@ -872,14 +853,11 @@ process genebody_coverage {
     !params.skip_qc && !params.skip_genebody_coverage
 
     input:
-    file bam from bam_forSubsamp.collect()
+    file bam from bam_forSubsamp
     file bed12 from bed_genebody_coverage.collect()
 
     output:
     file "*.{txt,pdf,r}" into genebody_coverage_results
-    file '*.command.log' into genebody_log
-    file '*.command.sh' into genebdoy_sh
-    file '*.command.err' into genebody_err
 
     script:
     prefix = bam.baseName - '_filteredAligned.sortedByCoord.out'
@@ -890,9 +868,6 @@ process genebody_coverage {
         -o ${prefix} \\
         -r $bed12
     mv log.txt ${prefix}.log.txt
-    mv .command.log ${prefix}_genebody.command.log
-    mv .command.sh ${prefix}_genebody.command.sh
-    mv .command.err ${prefix}_genebody.command.err
     """
 }
 
@@ -901,13 +876,8 @@ process genebody_coverage {
  */
 process preseq {
     tag "${bam_preseq.baseName - '.sorted'}"
-    publishDir "${params.outdir}/05-preseq", mode: 'copy',
-      saveAs: {filename ->
-        if (filename.indexOf(".command.log") > 0)                      "logs/$filename"
-        else if (filename.indexOf(".command.sh") > 0)                  "logs/$filename"
-        else if (filename.indexOf(".command.err") > 0)                 "logs/$filename"
-        else filename
-    }
+    publishDir "${params.outdir}/05-preseq", mode: 'copy'
+
     when:
     !params.skip_qc && !params.skip_preseq
 
@@ -916,17 +886,11 @@ process preseq {
 
     output:
     file "${prefix}.ccurve.txt" into preseq_results
-    file '*.command.log' into preseq_log
-    file '*.command.sh' into preseq_sh
-    file '*.command.err' into preseq_err
 
     script:
     prefix = bam_preseq.baseName - '_filteredAligned.sortedByCoord.out'
     """
     preseq lc_extrap -v -B $bam_preseq -o ${prefix}.ccurve.txt
-    mv .command.log ${prefix}.command.log
-    mv .command.sh ${prefix}.command.sh
-    mv .command.err ${prefix}.command.err
     """
 }
 
@@ -937,12 +901,8 @@ process preseq {
 process markDuplicates {
     tag "${bam.baseName - '.sorted'}"
     publishDir "${params.outdir}/06-removeDuplicates/picard", mode: 'copy',
-        saveAs: {filename ->
-        if (filename.indexOf("_metrics.txt") > 0)                      "metrics/$filename"
-        else if (filename.indexOf(".command.sh") > 0)                  "logs/$filename"
-        else if (filename.indexOf(".command.err") > 0)                 "logs/$filename"
-        else if (filename.indexOf(".command.log") > 0)                 "logs/$filename"
-    }
+        saveAs: {filename -> filename.indexOf("_metrics.txt") > 0 ? "metrics/$filename" : "$filename"}
+
     when:
     !params.skip_qc && !params.skip_dupradar
 
@@ -953,9 +913,6 @@ process markDuplicates {
     file "${prefix}.markDups.bam" into bam_md
     file "${prefix}.markDups_metrics.txt" into picard_results
     file "${prefix}.markDups.bam.bai"
-    file '*.command.log' into picard_log
-    file '*.command.sh' into picard_sh
-    file '*.command.err' into picard_err
 
     script:
     prefix = bam.baseName - '_filteredAligned.sortedByCoord.out'
@@ -971,9 +928,6 @@ process markDuplicates {
         PROGRAM_RECORD_ID='null' \\
         VALIDATION_STRINGENCY=LENIENT
     samtools index ${prefix}.markDups.bam
-    mv .command.log ${prefix}.command.log
-    mv .command.sh ${prefix}.command.sh
-    mv .command.err ${prefix}.command.err
     """
 }
 
@@ -992,9 +946,6 @@ process dupradar {
             else if (filename.indexOf("_dupMatrix.txt") > 0) "gene_data/$filename"
             else if (filename.indexOf("_duprateExpDensCurve.txt") > 0) "scatter_curve_data/$filename"
             else if (filename.indexOf("_intercept_slope.txt") > 0) "intercepts_slopes/$filename"
-            else if (filename.indexOf(".command.log") > 0) "logs/$filename"
-            else if (filename.indexOf(".command.sh") > 0) "logs/$filename"
-            else if (filename.indexOf(".command.err") > 0) "logs/$filename"
             else "$filename"
         }
     cpus '20'
@@ -1009,12 +960,8 @@ process dupradar {
 
     output:
     file "*.{pdf,txt}" into dupradar_results
-    file '*.command.log' into dupradar_log
-    file '*.command.sh' into dupradar_sh
-    file '*.command.err' into dupradar_err
 
     script: // This script is bundled with the pipeline, in nfcore/rnaseq/bin/
-    prefix = bam_md.baseName - '.sorted.markDups'
     def dupradar_direction = 0
     if (forward_stranded && !unstranded) {
         dupradar_direction = 1
@@ -1024,9 +971,6 @@ process dupradar {
     def paired = params.singleEnd ? 'single' :  'paired'
     """
     dupRadar.r $bam_md $gtf $dupradar_direction $paired 20
-    mv .command.log ${prefix}.command.log
-    mv .command.sh ${prefix}.command.sh
-    mv .command.err ${prefix}.command.err
     """
 }
 
@@ -1042,9 +986,6 @@ process featureCounts {
             if (filename.indexOf("biotype_counts") > 0) "biotype_counts/$filename"
             else if (filename.indexOf("_gene.featureCounts.txt.summary") > 0) "gene_count_summaries/$filename"
             else if (filename.indexOf("_gene.featureCounts.txt") > 0) "gene_counts/$filename"
-            else if (filename.indexOf(".command.log") > 0) "logs/$filename"
-            else if (filename.indexOf(".command.sh") > 0) "logs/$filename"
-            else if (filename.indexOf(".command.err") > 0) "logs/$filename"
             else "$filename"
         }
 
@@ -1057,9 +998,6 @@ process featureCounts {
     file "${sample_name}_gene.featureCounts.txt" into geneCounts, featureCounts_to_merge
     file "${sample_name}_gene.featureCounts.txt.summary" into featureCounts_logs
     file "${sample_name}_biotype_counts*mqc.{txt,tsv}" into featureCounts_biotype
-    file '*.command.log' into feature_counts_log
-    file '*.command.sh' into feature_counts_sh
-    file '*.command.err' into feature_counts_err
 
     script:
     def featureCounts_direction = 0
@@ -1076,9 +1014,6 @@ process featureCounts {
     featureCounts -a $gtf -g ${params.fcGroupFeaturesType} -o ${sample_name}_biotype.featureCounts.txt -p -s $featureCounts_direction $bam_featurecounts
     cut -f 1,7 ${sample_name}_biotype.featureCounts.txt | tail -n +3 | cat $biotypes_header - >> ${sample_name}_biotype_counts_mqc.txt
     mqc_features_stat.py ${sample_name}_biotype_counts_mqc.txt -s $sample_name -f rRNA -o ${sample_name}_biotype_counts_gs_mqc.tsv
-    mv .command.log ${sample_name}.command.log
-    mv .command.sh ${sample_name}.command.sh
-    mv .command.err ${sample_name}.command.err
     """
 }
 
@@ -1093,14 +1028,14 @@ process merge_featureCounts {
     file input_files from featureCounts_to_merge.collect()
 
     output:
-    file 'merged_gene_counts.txt' into merged_counts
+    file 'merged_gene_counts.txt'
 
     script:
     //if we only have 1 file, just use cat and pipe output to csvtk. Else join all files first, and then remove unwanted column names.
     def single = input_files instanceof Path ? 1 : input_files.size()
     def merge = (single == 1) ? 'cat' : 'csvtk join -t -f "Geneid,Start,Length,End,Chr,Strand,gene_name"'
     """
-    $merge $input_files | csvtk cut -t -f "-Start,-Chr,-End,-Length,-Strand" | sed 's/.markDups.bam//g' | sed 's/_filteredAligned.sortedByCoord.out.bam//g' > merged_gene_counts.txt
+    $merge $input_files | csvtk cut -t -f "-Start,-Chr,-End,-Length,-Strand" | sed 's/.markDups.bam//g' | sed 's/\_filteredAligned.sortedByCoord.out.bam//g' > merged_gene_counts.txt
     """
 }
 
@@ -1115,9 +1050,6 @@ process stringtieFPKM {
             if (filename.indexOf("transcripts.gtf") > 0) "transcripts/$filename"
             else if (filename.indexOf("cov_refs.gtf") > 0) "cov_refs/$filename"
             else if (filename.indexOf("ballgown") > 0) "ballgown/$filename"
-            else if (filename.indexOf(".command.sh") > 0)                  "logs/$filename"
-            else if (filename.indexOf(".command.err") > 0)                 "logs/$filename"
-            else if (filename.indexOf(".command.log") > 0)                 "logs/$filename"
             else "$filename"
         }
 
@@ -1129,10 +1061,8 @@ process stringtieFPKM {
     file "${prefix}_transcripts.gtf"
     file "${prefix}.gene_abund.txt"
     file "${prefix}.cov_refs.gtf"
+    file ".command.log" into stringtie_log
     file "${prefix}_ballgown"
-    file '*.command.log' into stringtie_log
-    file '*.command.sh' into stringtie_sh
-    file '*.command.err' into stringtie_err
 
     script:
     prefix = bam_stringtieFPKM.baseName - '_filteredAligned.sortedByCoord.out'
@@ -1152,9 +1082,6 @@ process stringtieFPKM {
         -C ${prefix}.cov_refs.gtf \\
         -e \\
         -b ${prefix}_ballgown
-        mv .command.log ${prefix}.command.log
-        mv .command.sh ${prefix}.command.sh
-        mv .command.err ${prefix}.command.err
     """
 }
 
@@ -1164,13 +1091,7 @@ process stringtieFPKM {
 process sample_correlation {
     label 'low_memory'
     tag "${input_files[0].toString() - '.sorted_gene.featureCounts.txt' - 'Aligned'}"
-    publishDir "${params.outdir}/09-sample_correlation", mode: 'copy',
-      saveAs: {filename ->
-        if (filename.indexOf(".command.log") > 0)                      "logs/$filename"
-        else if (filename.indexOf(".command.sh") > 0)                  "logs/$filename"
-        else if (filename.indexOf(".command.err") > 0)                 "logs/$filename"
-        else filename
-    }
+    publishDir "${params.outdir}/09-sample_correlation", mode: 'copy'
 
     when:
     !params.skip_qc && !params.skip_edger
@@ -1183,9 +1104,6 @@ process sample_correlation {
 
     output:
     file "*.{txt,pdf,csv}" into sample_correlation_results
-    file '.command.log' into edger_log
-    file '.command.sh' into edger_sh
-    file '.command.err' into edger_err
 
     when:
     num_bams > 2 && (!params.sampleLevel)
@@ -1204,13 +1122,7 @@ process sample_correlation {
  * STEP 12 MultiQC
  */
 process multiqc {
-    publishDir "${params.outdir}/99-stats/MultiQC", mode: 'copy',
-      saveAs: {filename ->
-        if (filename.indexOf(".command.log") > 0)                      "logs/$filename"
-        else if (filename.indexOf(".command.sh") > 0)                  "logs/$filename"
-        else if (filename.indexOf(".command.err") > 0)                 "logs/$filename"
-        else filename
-    }
+    publishDir "${params.outdir}/99-stats/MultiQC", mode: 'copy'
 
     when:
     !params.skip_multiqc
@@ -1233,10 +1145,8 @@ process multiqc {
     output:
     file '*multiqc_report.html' into multiqc_report
     file '*_data' into multiqc_data
+    file '.command.err' into multiqc_stderr
     val prefix into multiqc_prefix
-    file '.command.log' into multiqc_log
-    file '.command.sh' into multiqc_sh
-    file '.command.err' into multiqc_err
 
     script:
     prefix = fastqc[0].toString() - '_fastqc.html' - 'fastqc/'
