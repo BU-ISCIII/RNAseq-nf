@@ -590,7 +590,7 @@ if(params.aligner == 'star'){
                 else if (params.saveAlignedIntermediates && filename != "where_are_my_files.txt") filename
                 else null
             }
-        cpus '10'
+        cpus '20'
 		penv 'openmp'
 
         input:
@@ -616,7 +616,7 @@ if(params.aligner == 'star'){
         STAR --genomeDir $index \\
             --sjdbGTFfile $gtf \\
             --readFilesIn $reads  \\
-            --runThreadN 10 \\
+            --runThreadN 20 \\
             --twopassMode Basic \\
             --outWigType bedGraph \\
             --outSAMtype BAM SortedByCoordinate $avail_mem \\
