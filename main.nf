@@ -877,22 +877,17 @@ process genebody_coverage {
 
     output:
     file "*.{txt,pdf,r}" into genebody_coverage_results
-    file '*.command.log' into genebody_log
-    file '*.command.sh' into genebdoy_sh
-    file '*.command.err' into genebody_err
+    file '.command.log' into genebody_log
+    file '.command.sh' into genebdoy_sh
+    file '.command.err' into genebody_err
 
     script:
-    prefix = bam.baseName - '_filteredAligned.sortedByCoord.out'
     """
     samtools index $bam
     geneBody_coverage.py \\
         -i $bam \\
-        -o ${prefix} \\
+        -o geneBody_coverage \\
         -r $bed12
-    mv log.txt ${prefix}.log.txt
-    mv .command.log ${prefix}_genebody.command.log
-    mv .command.sh ${prefix}_genebody.command.sh
-    mv .command.err ${prefix}_genebody.command.err
     """
 }
 
