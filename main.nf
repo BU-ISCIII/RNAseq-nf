@@ -545,10 +545,10 @@ process trimming {
             saveAs: {filename ->
                 if (filename.indexOf("_fastqc") > 0) "FastQC/$filename"
                 else if (filename.indexOf(".log") > 0) "logs/$filename"
-                else if (params.saveTrimmed && filename.indexOf(".fastq.gz")) "trimmed/$filename"
                 else if (filename.indexOf(".command.log") > 0) "logs/$filename"
                 else if (filename.indexOf(".command.sh") > 0) "logs/$filename"
                 else if (filename.indexOf(".command.err") > 0) "logs/$filename"
+                else if (params.saveTrimmed && filename.indexOf(".fastq.gz")) "trimmed/$filename"
                 else null
         }
 
