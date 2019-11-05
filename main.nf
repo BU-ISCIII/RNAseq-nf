@@ -855,7 +855,6 @@ process rseqc {
  */
 process genebody_coverage {
     label 'mid_memory'
-    tag "${bam.baseName - '.sorted'}"
        publishDir "${params.outdir}/04-rseqc" , mode: 'copy',
         saveAs: {filename ->
             if (filename.indexOf("geneBodyCoverage.curves.pdf") > 0)       "geneBodyCoverage/$filename"
