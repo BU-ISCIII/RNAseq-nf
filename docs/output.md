@@ -18,11 +18,13 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
   * [Gene body coverage](#gene-body-coverage)
   * [Read distribution](#read-distribution)
   * [Junction annotation](#junction-annotation)
-* [dupRadar](#dupradar) v1.12.1 - technical / biological read duplication
 * [Preseq](#preseq) v2.0.3 - library complexity
-* [featureCounts](#featurecounts) v - gene counts, biotype counts, rRNA estimation.
+* [Picard](#picard) v2.18.27 - Identify duplicate reads
+* [dupRadar](#dupradar) v1.12.1 - technical / biological read duplication
+* [Subread](#featurecounts) v1.6.4 - gene counts, biotype counts, rRNA estimation.
 * [StringTie](#stringtie) v1.3.5 - FPKMs for genes and transcripts
-* [edgeR](#edgeR) v3.24.1 - create MDS plot and sample pairwise distance heatmap / dendrogram
+* [edgeR](#edger) v3.24.1 - create MDS plot and sample pairwise distance heatmap / dendrogram
+* [DESeq2](#deseq2) v1.18.1 - Diferential expression analysis and plots
 * [MultiQC](#multiqc) v1.7 - aggregate report, describing results of the whole pipeline
 
 ## Preprocessing
@@ -40,24 +42,25 @@ For further reading and documentation see the [FastQC help](http://www.bioinform
 * `zips/{sample_id}_R[12]_fastqc.zip`
   * zip file containing the FastQC report, tab-delimited data file and plot images
 
-  ### Trimming
-  [Trimmomatic](http://www.usadellab.org/cms/?page=trimmomatic) is used for removal of adapter contamination and trimming of low quality regions.
-  Parameters included for trimming are:
-  -  Nucleotides with phred quality < 10 in 3'end.
-  -  Mean phred quality < 20 in a 4 nucleotide window.
-  -  Read lenght < 50
+### Trimming
+[Trimmomatic](http://www.usadellab.org/cms/?page=trimmomatic) is used for removal of adapter contamination and trimming of low quality regions.
+Parameters included for trimming are:
+-  Nucleotides with phred quality < 10 in 3'end.
+-  Mean phred quality < 20 in a 4 nucleotide window.
+-  Read lenght < 50
 
-  MultiQC reports the percentage of bases removed by trimming in bar plot showing percentage or reads trimmed in forward and reverse.
+MultiQC reports the percentage of bases removed by trimming in bar plot showing percentage or reads trimmed in forward and reverse.
 
-  **Results directory: `02-preprocessing`**
-  - Files:
-     - `trimmed/{sample_id}_filtered_R[12].fastq.gz`: contains high quality reads with both forward and reverse tags surviving.
-     - `trimmed/{sample_id}_unpaired_R[12].fastq.gz`: contains high quality reads with only forward or reverse tags surviving.
-     - `FastQC/{sample_id}_filtered_R[12].fastqc.html`: html report of the trimmed reads.
-     - `FastQC/{sample_id}_filtered_R[12].fastqc.html.zip`: zip compression of above file.
-     - `logs/{sample_id}.log`: log file of the trimming process.
+**Results directory: `02-preprocessing`**
+- Files:
+   - `trimmed/{sample_id}_filtered_R[12].fastq.gz`: contains high quality reads with both forward and reverse tags surviving.
+   - `trimmed/{sample_id}_unpaired_R[12].fastq.gz`: contains high quality reads with only forward or reverse tags surviving.
+   - `FastQC/{sample_id}_filtered_R[12].fastqc.html`: html report of the trimmed reads.
+   - `FastQC/{sample_id}_filtered_R[12].fastqc.html.zip`: zip compression of above file.
+   - `logs/{sample_id}.log`: log file of the trimming process.
 
-  **NOTE:** Trimmed reads are not delivered to the researcher by default due to disk space issues. If you are interesested in using them, please contact us and we will add them to your delivery.
+**NOTE:** Trimmed reads are not delivered to the researcher by default due to disk space issues. If you are interesested in using them, please contact us and we will add them to your delivery.
+
 ##Alignment
 ### STAR
 STAR is a read aligner designed for RNA sequencing.  STAR stands for Spliced Transcripts Alignment to a Reference, it produces results comparable to TopHat (the aligned previously used by NGI for RNA alignments) but is much faster.
@@ -207,15 +210,13 @@ This plot will not be generated for single-end data. Very short inner distances 
 RSeQC documentation: [inner_distance.py](http://rseqc.sourceforge.net/#inner-distance-py)
 
 #### Gene body coverage
-**NB:** In nfcore/rnaseq we subsample this to 1 Million reads. This speeds up this task significantly and has no to little effect on the results.
+This script calculates the reads coverage across gene bodies. This makes it easy to identify 3' or 5' skew in libraries. A skew towards increased 3' coverage can happen in degraded samples prepared with poly-A selection.
 
 **Output: `geneBodyCoverage/`**
 
-* `{sample_id}.geneBodyCoverage.curves.pdf`
-* `rscripts/{sample_id}.geneBodyCoverage.r`
-* `data/{sample_id}.geneBodyCoverage.txt`
+* `geneBody_coverage.geneBodyCoverage.curves.pdf`
+* `geneBody_coverage.geneBodyCoverage.heatMap.pdf`
 
-This script calculates the reads coverage across gene bodies. This makes it easy to identify 3' or 5' skew in libraries. A skew towards increased 3' coverage can happen in degraded samples prepared with poly-A selection.
 
 A typical set of libraries with little or no bias will look as follows:
 
@@ -255,28 +256,6 @@ Junction annotation compares detected splice junctions to a reference gene model
 RSeQC documentation: [junction_annotation.py](http://rseqc.sourceforge.net/#junction-annotation-py)
 
 ##Counts
-### dupRadar
-[dupRadar](https://www.bioconductor.org/packages/release/bioc/html/dupRadar.html) is a Bioconductor library for R. It plots the duplication rate against expression (RPKM) for every gene. A good sample with little technical duplication will only show high numbers of duplicates for highly expressed genes. Samples with technical duplication will have high duplication for all genes, irrespective of transcription level.
-
-![dupRadar](images/dupRadar_plot.png)
-> _Credit: [dupRadar documentation](https://www.bioconductor.org/packages/devel/bioc/vignettes/dupRadar/inst/doc/dupRadar.html)_
-
-**Output directory: `06-removeDuplicates`**
-
-* `{sample_id}.markDups.bam`
-* `{sample_id}.markDups.bam.bai`
-* `{sample_id}.markDups_dup_intercept_mqc.txt`
-* `{sample_id}.markDups_duprateExpDensCurve_mqc.tx`
-* `box_plot/{sample_id}.markDups_duprateExpBoxplot.pdf`
-* `gene_data/{sample_id}.markDups_dupMatrix.txt`
-* `histograms/{sample_id}.markDups_expressionHist.pdf`
-* `intercepts_slopes/{sample_id}.markDups_intercept_slope.txt`
-* `metrics/{sample_id}.markDups_metrics.txt`
-* `scatter_plots/{sample_id}.markDups.bam_duprateExpDens.pdf`
-
-
-DupRadar documentation: [dupRadar docs](https://www.bioconductor.org/packages/devel/bioc/vignettes/dupRadar/inst/doc/dupRadar.html)
-
 ### Preseq
 [Preseq](http://smithlabresearch.org/software/preseq/) estimates the complexity of a library, showing how many additional unique reads are sequenced for increasing the total read count. A shallow curve indicates that the library has reached complexity saturation and further sequencing would likely not add further unique reads. The dashed line shows a perfectly complex library where total reads = unique reads.
 
@@ -289,8 +268,40 @@ Note that these are predictive numbers only, not absolute. The MultiQC plot can 
 * `{sample_id}.ccurve.txt`
   * This file contains plot values for the complexity curve, plotted in the MultiQC report.
 
+### Picard
+[Picard](https://broadinstitute.github.io/picard/index.html) is a set of command line tools for manipulating high-throughput sequencing (HTS) data. In this case we used it to locate and tag duplicate reads in BAM files.
+
+**Output directory: `06-removeDuplicates/picard`**
+
+* `{sample_id}.markDups.bam`
+* `{sample_id}.markDups.bam.bai`
+* `metrics/{sample_id}.markDups_metrics.txt`
+
+Picard documentation: [Picard docs](https://broadinstitute.github.io/picard/command-line-overview.html)
+
+
+### dupRadar
+[dupRadar](https://www.bioconductor.org/packages/release/bioc/html/dupRadar.html) is a Bioconductor library for R. It plots the duplication rate against expression (RPKM) for every gene. A good sample with little technical duplication will only show high numbers of duplicates for highly expressed genes. Samples with technical duplication will have high duplication for all genes, irrespective of transcription level.
+
+![dupRadar](images/dupRadar_plot.png)
+> _Credit: [dupRadar documentation](https://www.bioconductor.org/packages/devel/bioc/vignettes/dupRadar/inst/doc/dupRadar.html)_
+
+**Output directory: `06-removeDuplicates/dupRadar`**
+
+* `{sample_id}.markDups_dup_intercept_mqc.txt`
+* `{sample_id}.markDups_duprateExpDensCurve_mqc.tx`
+* `box_plot/{sample_id}.markDups_duprateExpBoxplot.pdf`
+* `gene_data/{sample_id}.markDups_dupMatrix.txt`
+* `histograms/{sample_id}.markDups_expressionHist.pdf`
+* `intercepts_slopes/{sample_id}.markDups_intercept_slope.txt`
+* `scatter_plots/{sample_id}.markDups.bam_duprateExpDens.pdf`
+
+
+DupRadar documentation: [dupRadar docs](https://www.bioconductor.org/packages/devel/bioc/vignettes/dupRadar/inst/doc/dupRadar.html)
+
+
 ### featureCounts
-[featureCounts](http://bioinf.wehi.edu.au/featureCounts/) from the subread package summarises the read distribution over genomic features such as genes, exons, promotors, gene bodies, genomic bins and chromosomal locations.
+[featureCounts](http://bioinf.wehi.edu.au/featureCounts/) from the subread package summarizes the read distribution over genomic features such as genes, exons, promotors, gene bodies, genomic bins and chromosomal locations.
 RNA reads should mostly overlap genes, so be assigned.
 
 ![featureCounts](images/featureCounts_assignment_plot.png)
@@ -324,9 +335,10 @@ StringTie outputs FPKM metrics for genes and transcripts as well as the transcri
 * `cov_refs/{sample_id}.cov_refs.gtf`
   * This `.gtf` file contains the transcripts that are fully covered by reads.
 
-##Counts analysis and Differential Expression (DE)
-### Sample Correlation with edgeR
-[edgeR](https://bioconductor.org/packages/release/bioc/html/edgeR.html) is a Bioconductor package for R used for RNA-seq data analysis. The script included in the pipeline uses edgeR to normalise read counts and create a heatmap / dendrogram showing pairwise euclidean distance (sample similarity). It also creates a 2D MDS scatter plot showing sample grouping. These help to show sample similarity and can reveal batch effects and sample groupings.
+## Sample correlation and Differential Expression (DE)
+
+### edgeR
+Sample correlation with edgeR. [edgeR](https://bioconductor.org/packages/release/bioc/html/edgeR.html) is a Bioconductor package for R used for RNA-seq data analysis. The script included in the pipeline uses edgeR to normalize read counts and create a heatmap / dendrogram showing pairwise euclidean distance (sample similarity). It also creates a 2D MDS scatter plot showing sample grouping. These help to show sample similarity and can reveal batch effects and sample groupings.
 
 **Heatmap:**
 
@@ -351,9 +363,78 @@ StringTie outputs FPKM metrics for genes and transcripts as well as the transcri
 * `log2CPM_sample_distances_mqc.csv`
   * Raw data used for heatmap and dendrogram plots.
 
-##Final reports
+### DESeq2
+Diferential expression analysis with DESeq2. [DESeq2](https://bioconductor.org/packages/release/bioc/manuals/DESeq2/man/DESeq2.pdf) is a Bioconductor package for R used for RNA-seq data analysis. The script included in the pipeline uses DESeq2 to normalize read counts and create a heatmap / dendrogram showing pairwise euclidean distance (sample similarity). It also creates other plots to evaluate the sample dispersion. It also provides PCA plots to evaluate sample grouping.
+
+**MA plot**
+![MAPlot](images/ma_plot.png)
+
+**Sample to sample heatmap**
+![heatmap_sampletosample](images/sample_to_sample.png)
+
+**PCA plot**
+![PCA](images/PCA_plot.png)
+
+**Normalized Boxplot**
+![Boxplot_norm](images/boxplot.jpg)
+
+**Cook Boxplot**
+![Boxplot_cook](images/cooks_boxplot.png)
+
+**Dispersion Estimate**
+![Disp_calc](images/disp_calc.png)
+
+**Pvalue test histogram**
+![Disp_calc](images/pvalue_hist.png)
+
+**Top20 genes heatmap**
+![Top20_Heatmap](images/heatmap_top20.png)
+
+**Hierarchical clustering**
+![Hclust](images/hclust.png)
+
+**Differential expression heatmap**
+![DE_heatmap](images/rgb_heatmap.png)
+
+* `{condition1}vs{condition2}.txt`
+  * Comparative table with the differential expression of two conditions.
+* `maPlot_all.pdf`
+  * MA plot of the DESeq analysis results for all the samples
+* `maPlots_per_comparison.pdf`
+  * PDF file with the MA plots separated by the different comparisons of differential expression
+* `heatmap_sample_to_sample.pdf`
+  * Heatmap with the euclidean distance between samples.
+* `plotPCA.pdf`
+  * PCA plot of the samples for the rlog and the vsd.
+      * rlog refers to the regularized log transformation, which transforms the count data to the log2 scale in a way which minimizes differences between samples for rows with small counts, and which normalizes with respect to library size.
+      * vsd refers to variance stabilizing transformation (VST), which calculates a variance stabilizing transformation (VST) from the fitted dispersion-mean relation(s) and then transforms the count data (normalized by division by the size factors or normalization factors), yielding a matrix of values which are now approximately homoskedastic (having constant variance along the range of mean values). The transformation also normalizes with respect to library size.
+* `boxplot.pdf`
+  * PDF file with the box_plots
+      * Box plot of the normalized Counts
+      * Box plot of the counts cook distances to see if one sample is consistently higher than others.
+* `plotDispersions.pdf`
+  * PDF file with plots to analyze the dispersion of the samples
+      * Dispersion calc is the per-gene dispersion estimate together with the fitted mean-dispersion relationship.
+      * Histogram with the test of the differential expression pvalues
+* `heatmapCount_top20.pdf`
+  * Heat map of the top 20 genes with the higher normalized mean count.
+* `heatmapCount_top20_no2samp.pdf`
+  * Heat map of the top 20 genes with the higher normalized mean count excluding the samples Clon10 and ClonIIIp
+* `FPKM_higher_1000.pdf`
+  * PDF file with the hierarchical clustering of the samples based in the genes with an FPKM higher than 1000
+* `FPKM_higher_1000_no2samp.pdf`
+  * PDF file with the hierarchical clustering of the samples based in the genes with an FPKM higher than 1000
+* `heatmapCounts_padj_0.01.pdf`
+  * Heat map of the differential expression considering the genes with an adjusted pvalue smaller than 0.01 for each of the following comparatives:
+      * KGN vs WT
+      * KGN vs CRSPR
+      * KGN vs NULL
+* `top20_KGN_WT_heatmap.pdf`
+  * Heatmap with the differential expression between KGN and WT with the top20 genes with a lower adjusted pvalue.
+
+## Final reports
 ### MultiQC
-[MultiQC](http://multiqc.info) is a visualisation tool that generates a single HTML report summarising all samples in your project. Most of the pipeline QC results are visualised in the report and further statistics are available in within the report data directory.
+[MultiQC](http://multiqc.info) is a visualization tool that generates a single HTML report summarizing all samples in your project. Most of the pipeline QC results are visualized in the report and further statistics are available in within the report data directory.
 
 The pipeline has special steps which allow the software versions used to be reported in the MultiQC output for future traceability.
 
