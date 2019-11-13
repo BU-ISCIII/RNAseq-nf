@@ -840,8 +840,8 @@ process bam_subsample {
  */
 process genebody_coverage {
     label 'mid_memory'
-    tag "${bam.baseName - '.sorted'}"
-       publishDir "${params.outdir}/04-rseqc" , mode: 'copy',
+    tag "GeneBodyCov"
+       publishDir "${params.outdir}/04-rseqc/geneBodyCoverage" , mode: 'copy',
         saveAs: {filename ->
             if (filename.indexOf("geneBodyCoverage.curves.pdf") > 0)       "geneBodyCoverage/$filename"
             else if (filename.indexOf("geneBodyCoverage.r") > 0)           "geneBodyCoverage/rscripts/$filename"
@@ -854,21 +854,18 @@ process genebody_coverage {
     !params.skip_qc && !params.skip_genebody_coverage
 
     input:
-    file bam from bam_forSubsamp
+    file bam from bam_forSubsamp.collect()
     file bed12 from bed_genebody_coverage.collect()
 
     output:
     file "*.{txt,pdf,r}" into genebody_coverage_results
 
     script:
-    prefix = bam.baseName - '_filteredAligned.sortedByCoord.out'
     """
-    samtools index $bam
     geneBody_coverage.py \\
         -i $bam \\
-        -o ${prefix} \\
+        -o  geneBodyCoverage \\
         -r $bed12
-    mv log.txt ${prefix}.log.txt
     """
 }
 
