@@ -1191,10 +1191,12 @@ process output_documentation {
 
     output:
     file "results_description.html"
+    file "results_description.pdf"
 
     script:
     """
     markdown_to_html.r $output_docs results_description.html
+    wkhtmltopdf --keep-relative-links results_description.html results_description.pdf
     """
 }
 
