@@ -1033,7 +1033,7 @@ process merge_featureCounts {
     def single = input_files instanceof Path ? 1 : input_files.size()
     def merge = (single == 1) ? 'cat' : 'csvtk join -t -f "Geneid,Start,Length,End,Chr,Strand,gene_name"'
     """
-    $merge $input_files | csvtk cut -t -f "-Start,-Chr,-End,-Length,-Strand" | sed 's/.markDups.bam//g' > merged_gene_counts.txt
+    $merge $input_files | csvtk cut -t -f "-Start,-Chr,-End,-Length,-Strand" | sed 's/_filteredAligned.sortedByCoord.out.bam//g' > merged_gene_counts.txt
     """
 }
 
@@ -1060,7 +1060,7 @@ process stringtieFPKM {
     file "${prefix}.gene_abund.txt"
     file "${prefix}.cov_refs.gtf"
     file ".command.log" into stringtie_log
-    file "${prefix}_ballgown"
+    file "${prefix}_ballgown" into ballgown_to_merge
 
     script:
     prefix = bam_stringtieFPKM.baseName - '_filteredAligned.sortedByCoord.out'
@@ -1083,8 +1083,33 @@ process stringtieFPKM {
     """
 }
 
+
 /*
- * STEP 11 - edgeR MDS and heatmap
+ * STEP 10 - merge FPKM
+ */
+process merge_FPKM {
+    tag "${fpkm_file.baseName - '.sorted'}"
+    publishDir "${params.outdir}/08-stringtieFPKM", mode: 'copy',
+        }
+
+    input:
+    file fpkm_file from ballgown_to_merge.collect()
+
+
+    output:
+    file "merged_FPKM.txt"
+
+    script:
+    file_names = fpkm_file.baseName
+    """
+    echo
+    """
+}
+
+
+
+/*
+ * STEP 12 - edgeR MDS and heatmap
  */
 process sample_correlation {
     label 'low_memory'
@@ -1117,7 +1142,7 @@ process sample_correlation {
 }
 
 /*
- * STEP 12 MultiQC
+ * STEP 13 MultiQC
  */
 process multiqc {
     publishDir "${params.outdir}/99-stats/MultiQC", mode: 'copy'
@@ -1156,10 +1181,10 @@ process multiqc {
 
 
 /*
- * STEP 13 - Output Description HTML
+ * STEP 14 - Output Description HTML
  */
 process output_documentation {
-    publishDir "${params.outdir}/99-stats/pipeline_info", mode: 'copy'
+    publishDir "${params.outdir}/../DOC/", mode: 'copy'
 
     input:
     file output_docs from ch_output_docs
