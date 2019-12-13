@@ -640,7 +640,7 @@ if(params.aligner == 'star'){
         script:
         prefix = reads[0].toString() - ~/(_R1)?(_filtered_)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
         def star_mem = task.memory ?: params.star_memory ?: false
-        def avail_mem = star_mem ? "--limitBAMsortRAM ${star_mem.toBytes() - 100000000}" : ''
+        def avail_mem = star_mem ? "--limitBAMsortRAM ${star_mem.toBytes() - 10000}" : ''
         seqCenter = params.seqCenter ? "--outSAMattrRGline ID:$prefix 'CN:$params.seqCenter'" : ''
         """
         STAR --genomeDir $index \\
