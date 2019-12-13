@@ -4,4 +4,4 @@
 args <- commandArgs(trailingOnly=TRUE)
 
 require(ballgown)
-my.data = ballgown(dataDir="ballgown/", samplePattern='*_ballgown', meas='all')
+my.data = ballgown(dataDir="./", samplePattern='*_ballgown', meas='all')
