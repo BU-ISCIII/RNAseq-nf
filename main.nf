@@ -54,6 +54,11 @@ def helpMessage() {
 
     nextflow run nf-core/rnaseq --reads '*_R{1,2}.fastq.gz' --genome GRCh37 -profile docker
 
+    The command to use the ENSEMBL reference is:
+    processing_Data/bioinformatics/pipelines/rnaseq-nf/nextflow run /processing_Data/bioinformatics/pipelines/rnaseq-nf/main.nf \\
+    --reads "00-reads/*_R{1,2}.fastq.gz" --fasta ../REFERENCES/Homo_sapiens.GRCh38.dna.toplevel.fa --star_index ../REFERENCES/star_index/ \\
+    --gtf ../REFERENCES/Homo_sapiens.GRCh38.98.gtf --saveAlignedIntermediates --fc_group_features 'gene_id' --fc_group_features_type 'gene_biotype' --outdir ./ -profile hpc_isciii
+
     Mandatory arguments:
       --reads                       Path to input data (must be surrounded with quotes)
       -profile                      Configuration profile to use. Can use multiple (comma separated)
@@ -148,8 +153,8 @@ params.saveAlignedIntermediates = false
 params.saveReference = false
 params.saveTrimmed = false
 //Feature Counts
-params.fcGroupFeatures = 'gene_id'
-params.fcGroupFeaturesType = 'gene_biotype'
+params.fcGroupFeatures = 'gene_name'
+params.fcGroupFeaturesType = 'gene_name'
 params.fcExtraAttributes = 'gene_name'
 //Skip steps
 params.skip_qc = false
