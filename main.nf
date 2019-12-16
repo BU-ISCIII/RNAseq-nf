@@ -120,6 +120,9 @@ def helpMessage() {
     AWSBatch options:
       --awsqueue                    The AWSBatch JobQueue that needs to be set when running on AWSBatch
       --awsregion                   The AWS Region for your AWS Batch job to run on
+
+    Service:
+      --service_id                  ID of the service.
     """.stripIndent()
 }
 
@@ -165,10 +168,11 @@ params.skip_dupradar = false
 params.skip_edger = false
 params.skip_multiqc = false
 params.skip_rseqc = false
+params.service_id = false
+
 // Defaults
 sampleLevel = false
 hisatBuildMemory = 200 // Required amount of memory in GB to build HISAT2 index with splice sites
-subsampFilesizeThreshold = 10000000000 // Don't subsample BAMs for RSeQC gene_body_coverage if less than this
 readPaths = null
 star_memory = false // Cluster specific param required for hebbe
 
@@ -1250,17 +1254,23 @@ process multiqc {
  * STEP 13 - Output Description HTML
  */
 process output_documentation {
-    publishDir "${params.outdir}/99-stats/pipeline_info", mode: 'copy'
+    publishDir "${params.outdir}/../DOC/", mode: 'copy'
 
     input:
     file output_docs from ch_output_docs
 
     output:
     file "results_description.html"
+    file "*.pdf"
 
     script:
     """
     markdown_to_html.r $output_docs results_description.html
+    if (params.service_id) {
+    wktmltopdf ----keep-relative-links results_description.html INFRES_${service_id}.pdf
+    } else {
+    wktmltopdf ----keep-relative-links results_description.html INFRES.pdf
+    }
     """
 }
 
