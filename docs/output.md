@@ -20,13 +20,16 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
   * <a href="#readdistribution">Read distribution</a>
   * <a href="#readduplication">Read duplication</a>
 * <a href="#preseq">Preseq</a> v2.0.3 - library complexity
+
 <!---* [Picard](#picard) v2.18.27 - Identify duplicate reads
 * [dupRadar](#dupradar) v1.12.1 - technical / biological read duplication--->
 * <a href="#featurecounts">Subread(Featurecounts)</a> v1.6.4 - gene counts, biotype counts, rRNA estimation.
 * <a href="#stringtie">StringTie</a> v1.3.5 - FPKMs for genes and transcripts
 * <a href="#edger">edgeR</a> v3.24.1 - create MDS plot and sample pairwise distance heatmap / dendrogram
+
 <!---* <a href="#deseq2">DESeq2</a> v1.18.1 - Differential expression analysis and plots--->
 * <a href="#multiqc">MultiQC</a> v1.7 - aggregate report, describing results of the whole pipeline
+
 <!---* Custom analysis:
   * <a href="#gatk">GATK</a> v.3.8.0  - Filter and variant calling.
   * <a href="#snpeff">SnpEff</a> v.4.3k - Variant annotation and field extraction.
@@ -492,8 +495,10 @@ trimming_reference
 * <a name="featurecounts_reference"></a> Liao Y, Smyth GK, Shi W. <a href="http://www.ncbi.nlm.nih.gov/pubmed/24227677">featureCounts: an efficient general-purpose program for assigning sequence reads to genomic features.</a> Bioinformatics, 30(7):923-30, 2014
 * <a name="StringTie_reference"></a> Pertea M, Pertea GM, Antonescu CM, Chang TC, Mendell JT, Salzberg SL. <a href="https://www.ncbi.nlm.nih.gov/pubmed/25690850">StringTie enables improved reconstruction of a transcriptome from RNA-seq reads.</a> Nat Biotechnol. 2015 Mar;33(3):290-5.
 * <a name="edgeR_reference"></a> Robinson MD, McCarthy DJ, Smyth GK. <a href="https://www.ncbi.nlm.nih.gov/pubmed/?term=edgeR%3A+a+Bioconductor+package+for+differential+expression+analysis+of+digital+gene+expression+data.">edgeR: a Bioconductor package for differential expression analysis of digital gene expression data.</a> Bioinformatics. 2010 Jan 1;26(1):139-40.
+
 <!---* <a name="DESeq2_reference"></a> Love MI, Huber W, Anders S. <a href="https://www.ncbi.nlm.nih.gov/pubmed/?term=Moderated+estimation+of+fold+change+and+dispersion+for+RNA-seq+data+with+DESeq2.">Moderated estimation of fold change and dispersion for RNA-seq data with DESeq2.</a> Genome Biol. 2014;15(12):550.--->
 * <a name="MultiQC_reference"></a> Ewels P, Magnusson M, Lundin S, Käller M. <a href="https://www.ncbi.nlm.nih.gov/pubmed/?term=MultiQC%3A+Summarize+analysis+results+for+multiple+tools+and+samples+in+a+single+report">MultiQC: summarize analysis results for multiple tools and samples in a single report.</a> Bioinformatics. 2016 Oct 1;32(19):3047-8.
+
 <!---* <a name="picard_reference"></a> <a href="https://github.com/broadinstitute/picard">web Picard toolkit</a> Broad Institute.
 * <a name="GATK_reference"></a> Van der Auwera GA, Carneiro M, Hartl C, Poplin R, del Angel G, Levy-Moonshine A, Jordan T, Shakir K, Roazen D, Thibault J, Banks E, Garimella K, Altshuler D, Gabriel S, DePristo M. <a href="https://www.ncbi.nlm.nih.gov/pubmed/?term=From+FastQ+Data+to+High-Confidence+Variant+Calls%3A+The+Genome+Analysis+Toolkit+Best+Practices+Pipeline">From FastQ data to high confidence variant calls: the Genome Analysis Toolkit best practices pipeline.</a> Curr Protoc Bioinformatics. 2013
 * <a name="SnpEff_reference"></a> Cingolani, P. and Platts, A. and Coon, M. and Nguyen, T. and Wang, L. and Land, S.J. and Lu, X. and Ruden, D.M. <a href="https://www.ncbi.nlm.nih.gov/pubmed/?term=A+program+for+annotating+and+predicting+the+effects+of+single+nucleotide+polymorphisms%2C+SnpEff%3A+SNPs+in+the+genome+of+Drosophila+melanogaster+strain+w1118%3B+iso-2%3B+iso-3"A program for annotating and predicting the effects of single nucleotide polymorphisms, SnpEff: SNPs in the genome of Drosophila melanogaster strain w1118; iso-2; iso-3.</a> Fly (Austin). 2012
