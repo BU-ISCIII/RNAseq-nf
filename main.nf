@@ -894,7 +894,7 @@ process genebody_coverage {
     samtools index $bam
     geneBody_coverage.py \\
         -i $bam \\
-        -o geneBody_coverage \\
+        -o geneBodyCoverage \\
         -r $bed12
     """
 }
