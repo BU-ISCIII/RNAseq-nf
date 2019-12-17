@@ -168,7 +168,7 @@ params.skip_dupradar = false
 params.skip_edger = false
 params.skip_multiqc = false
 params.skip_rseqc = false
-params.service_id = false
+
 
 // Defaults
 sampleLevel = false
@@ -1133,6 +1133,7 @@ process stringtieFPKM {
     file "${prefix}.gene_abund.txt"
     file "${prefix}.cov_refs.gtf"
     file "${prefix}_ballgown"
+    file "${prefix}_ballgown" into ballgown_to_merge
     file '*.command.log' into stringtie_log
     file '*.command.sh' into stringtie_sh
     file '*.command.err' into stringtie_err
@@ -1160,6 +1161,30 @@ process stringtieFPKM {
         mv .command.err ${prefix}.command.err
     """
 }
+
+
+/*
+ * STEP 10 - merge FPKM
+ */
+process merge_FPKM {
+    tag "${fpkm_file[0].toString() - '.sorted'}"
+    publishDir "${params.outdir}/08-stringtieFPKM", mode: 'copy'
+
+    input:
+    file fpkm_file from ballgown_to_merge.collect()
+
+
+    output:
+    file "merged_FPKM.txt"
+
+    script:
+    file_names = fpkm_file.baseName
+    """
+    echo "${fpkm_file}"
+    echo "${file_names}"
+    """
+}
+
 
 /*
  * STEP 11 - edgeR MDS and heatmap
@@ -1264,14 +1289,17 @@ process output_documentation {
     file "*.pdf"
 
     script:
-    """
-    markdown_to_html.r $output_docs results_description.html
     if (params.service_id) {
-    wktmltopdf ----keep-relative-links results_description.html INFRES_${service_id}.pdf
-    } else {
-    wktmltopdf ----keep-relative-links results_description.html INFRES.pdf
+      """
+      markdown_to_html.r $output_docs results_description.html
+      wkhtmltopdf --keep-relative-links results_description.html INFRES_${params.service_id}.pdf
+      """
+    } else{
+      """
+      markdown_to_html.r $output_docs results_description.html
+      wkhtmltopdf --keep-relative-links results_description.html INFRES.pdf
+      """
     }
-    """
 }
 
 
