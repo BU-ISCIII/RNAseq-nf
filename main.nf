@@ -57,7 +57,7 @@ def helpMessage() {
     The command to use the ENSEMBL reference is:
     processing_Data/bioinformatics/pipelines/rnaseq-nf/nextflow run /processing_Data/bioinformatics/pipelines/rnaseq-nf/main.nf \\
     --reads "00-reads/*_R{1,2}.fastq.gz" --fasta ../REFERENCES/Homo_sapiens.GRCh38.dna.toplevel.fa --star_index ../REFERENCES/star_index/ \\
-    --gtf ../REFERENCES/Homo_sapiens.GRCh38.98.gtf --saveAlignedIntermediates --fc_group_features 'gene_id' --fc_group_features_type 'gene_biotype' --outdir ./ -profile hpc_isciii
+    --gtf ../REFERENCES/Homo_sapiens.GRCh38.98.gtf --saveAlignedIntermediates --fcGroupFeatures gene_id --fcGroupFeaturesType gene_biotype --outdir ./ -profile hpc_isciii
 
     Mandatory arguments:
       --reads                       Path to input data (must be surrounded with quotes)
@@ -1165,7 +1165,7 @@ process stringtieFPKM {
 
 /*
  * STEP 10 - merge FPKM
- */
+
 process merge_FPKM {
     tag "${fpkm_file[0].toString() - '.sorted'}"
     publishDir "${params.outdir}/08-stringtieFPKM", mode: 'copy'
@@ -1178,13 +1178,12 @@ process merge_FPKM {
     file "merged_FPKM.txt"
 
     script:
-    file_names = fpkm_file.baseName
+    file_names = fpkm_file[0].baseName
     """
-    echo "${fpkm_file}"
-    echo "${file_names}"
+    merge_FPKM.R
     """
 }
-
+ */
 
 /*
  * STEP 11 - edgeR MDS and heatmap
