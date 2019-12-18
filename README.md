@@ -1,4 +1,6 @@
-# ![BU-ISCIII/rnaseq-nf](docs/images/BU_ISCIII_logo.png)
+<img src="docs/images/BU_ISCIII_logo.png" alt="logo" width="300" align="right"/>
+
+# RNA-seq
 
 <!--
 [![Build Status](https://travis-ci.org/nf-core/rnaseq.svg?branch=master)](https://travis-ci.org/nf-core/rnaseq)
