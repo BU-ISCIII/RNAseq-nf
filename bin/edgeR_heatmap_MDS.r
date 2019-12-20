@@ -9,12 +9,12 @@ if (length(args) < 3) {
 
 # Load / install required packages
 if (!require("limma")){
-    source("http://bioconductor.org/biocLite.R")
+    source("https://bioconductor.org/biocLite.R")
     biocLite("limma", suppressUpdates=TRUE)
     library("limma")
 }
 if (!require("edgeR")){
-    source("http://bioconductor.org/biocLite.R")
+    source("https://bioconductor.org/biocLite.R")
     biocLite("edgeR", suppressUpdates=TRUE)
     library("edgeR")
 }
