@@ -1166,27 +1166,6 @@ process stringtieFPKM {
 }
 
 
-/*
- * STEP 10 - merge FPKM
-
-process merge_FPKM {
-    tag "${fpkm_file[0].toString() - '.sorted'}"
-    publishDir "${params.outdir}/08-stringtieFPKM", mode: 'copy'
-
-    input:
-    file fpkm_file from ballgown_to_merge.collect()
-
-
-    output:
-    file "merged_FPKM.txt"
-
-    script:
-    file_names = fpkm_file[0].baseName
-    """
-    merge_FPKM.R
-    """
-}
- */
 
 /*
  * STEP 11 - edgeR MDS and heatmap
