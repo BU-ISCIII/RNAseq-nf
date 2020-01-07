@@ -26,4 +26,4 @@ dependencies:
   - deeptools=3.2.0
   - multiqc=1.7
   - wkhtmltopdf=0.12.4
-  - bioconductor-ballgown=2.10.0
+#  - bioconductor-ballgown=2.10.0 #In conflict with edger package.
