@@ -646,7 +646,7 @@ if (!params.skipTrimming) {
         nextseq = params.trim_nextseq > 0 ? "--nextseq ${params.trim_nextseq}" : ''
         if (params.singleEnd) {
             """
-            trim_galore --phred33 --fastqc --basename $prefix --gzip $c_r1 $tpc_r1 $nextseq $reads
+            trim_galore --phred33 --fastqc --gzip $c_r1 $tpc_r1 $nextseq $reads
             rename $prefix"_R1_trimmed.fq.gz $prefix"_filtered_R1.fastq.gz"
             rename $prefix"_R1_trimmed_fastqc.zip $prefix"_filtered_R1_fastqc.zip"
             rename $prefix"_R1.fastq.gz_trimming_report.txt $prefix"_filtered_R1_report.txt"
