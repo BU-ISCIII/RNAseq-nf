@@ -639,10 +639,10 @@ if (!params.skipTrimming) {
 
         script:
         prefix = name - ~/(_S[0-9]{2})?(_L00[1-9])?(.R1)?(_1)?(_R1)?(_trimmed)?(_val_1)?(_00*)?(\.fq)?(\.fastq)?(\.gz)?$/
-        c_r1 = clip_r1 > 0 ? "--clip_r1 ${clip_r1}" : ''
-        c_r2 = clip_r2 > 0 ? "--clip_r2 ${clip_r2}" : ''
-        tpc_r1 = three_prime_clip_r1 > 0 ? "--three_prime_clip_r1 ${three_prime_clip_r1}" : ''
-        tpc_r2 = three_prime_clip_r2 > 0 ? "--three_prime_clip_r2 ${three_prime_clip_r2}" : ''
+        c_r1 = params.clip_r1 > 0 ? "--clip_r1 ${params.clip_r1}" : ''
+        c_r2 = params.clip_r2 > 0 ? "--clip_r2 ${clip_r2}" : ''
+        tpc_r1 = params.three_prime_clip_r1 > 0 ? "--three_prime_clip_r1 ${params.three_prime_clip_r1}" : ''
+        tpc_r2 = params.three_prime_clip_r2 > 0 ? "--three_prime_clip_r2 ${params.three_prime_clip_r2}" : ''
         nextseq = params.trim_nextseq > 0 ? "--nextseq ${params.trim_nextseq}" : ''
         if (params.singleEnd) {
             """
