@@ -172,6 +172,16 @@ params.skip_edger = false
 params.skip_multiqc = false
 params.skip_rseqc = false
 
+//Trim Galore!
+params.skipTrimming = false
+params.clip_r1 = 0
+params.clip_r2 = 0
+params.three_prime_clip_r1 = 0
+params.three_prime_clip_r2 = 0
+params.trim_nextseq = 0
+params.pico = false
+params.saveTrimmed = false
+
 
 // Defaults
 sampleLevel = false
@@ -472,9 +482,6 @@ if(params.aligner == 'hisat2' && !params.hisat2_index && params.fasta){
 if(params.gff){
   process convertGFFtoGTF {
       tag "$gff"
-
-
-
       input:
       file gff from gffFile
 
@@ -519,8 +526,6 @@ if(!params.bed12){
  */
 process fastqc {
     tag "$name"
-
-
     publishDir "${params.outdir}/01-fastqc", mode: 'copy',
         saveAs: {filename ->
         if (filename.indexOf(".zip") > 0) "zips/$filename"
@@ -556,8 +561,6 @@ process fastqc {
 process trimming {
     label 'low_memory'
     tag "$prefix"
-
-
     publishDir "${params.outdir}/02-preprocessing", mode: 'copy',
             saveAs: {filename ->
                 if (filename.indexOf("_fastqc") > 0) "FastQC/$filename"
@@ -606,6 +609,61 @@ process trimming {
     }
 }
 */
+
+
+/*
+ * STEP 2 - Trim Galore!
+ */
+if (!params.skipTrimming) {
+    process trim_galore {
+        label 'low_memory'
+        tag "$name"
+        publishDir "${params.outdir}/trim_galore", mode: 'copy',
+            saveAs: {filename ->
+                if (filename.indexOf("_fastqc") > 0) "FastQC/$filename"
+                else if (filename.indexOf("trimming_report.txt") > 0) "logs/$filename"
+                else if (params.saveTrimmed && filename.indexOf(".fq.gz")) "trimmed/$filename"
+                else null
+            }
+
+        input:
+        set val(name), file(reads) from raw_reads_trimming
+        file wherearemyfiles from ch_where_trim_galore.collect()
+
+        output:
+        set val(name), file("*fastq.gz") into trimmed_reads
+        file "*_report.txt" into trimmomatic_results
+        file "*_fastqc.{zip,html}" into trimmomatic_fastqc_reports
+        file "where_are_my_files.txt"
+
+
+        script:
+        prefix = name - ~/(_S[0-9]{2})?(_L00[1-9])?(.R1)?(_1)?(_R1)?(_trimmed)?(_val_1)?(_00*)?(\.fq)?(\.fastq)?(\.gz)?$/
+        c_r1 = clip_r1 > 0 ? "--clip_r1 ${clip_r1}" : ''
+        c_r2 = clip_r2 > 0 ? "--clip_r2 ${clip_r2}" : ''
+        tpc_r1 = three_prime_clip_r1 > 0 ? "--three_prime_clip_r1 ${three_prime_clip_r1}" : ''
+        tpc_r2 = three_prime_clip_r2 > 0 ? "--three_prime_clip_r2 ${three_prime_clip_r2}" : ''
+        nextseq = params.trim_nextseq > 0 ? "--nextseq ${params.trim_nextseq}" : ''
+        if (params.singleEnd) {
+            """
+            trim_galore --phred33 --fastqc --basename $prefix --gzip $c_r1 $tpc_r1 $nextseq $reads
+            rename $prefix"_R1_trimmed.fq.gz $prefix"_filtered_R1.fastq.gz"
+            rename $prefix"_R1_trimmed_fastqc.zip $prefix"_filtered_R1_fastqc.zip"
+            rename $prefix"_R1.fastq.gz_trimming_report.txt $prefix"_filtered_R1_report.txt"
+            rename $prefix"_R1_trimmed_fastqc.html $prefix"_filtered_R1_fastqc.html
+            """
+        } else {
+            """
+            trim_galore --paired --phred33 --fastqc --gzip $c_r1 $c_r2 $tpc_r1 $tpc_r2 $nextseq $reads
+            """
+        }
+    }
+}else{
+   raw_reads_trimming
+       .set {trimgalore_reads}
+   trimgalore_results = Channel.empty()
+}
+
 
 
 /*
@@ -808,8 +866,6 @@ if(params.aligner == 'hisat2'){
 process rseqc {
     label 'mid_memory'
     tag "${bam_rseqc.baseName - '.sorted'}"
-
-
     publishDir "${params.outdir}/04-rseqc" , mode: 'copy',
         saveAs: {filename ->
                  if (filename.indexOf("bam_stat.txt") > 0)                      "bam_stat/$filename"
@@ -886,8 +942,6 @@ process rseqc {
  */
 process genebody_coverage {
     label 'mid_memory'
-
-
        publishDir "${params.outdir}/04-rseqc" , mode: 'copy',
         saveAs: {filename ->
             if (filename.indexOf("geneBodyCoverage.curves.pdf") > 0)       "geneBodyCoverage/$filename"
@@ -965,8 +1019,6 @@ process preseq {
  */
 process markDuplicates {
     tag "${bam.baseName - '.sorted'}"
-
-
     publishDir "${params.outdir}/06-removeDuplicates/picard", mode: 'copy',
         saveAs: {filename ->
         if (filename.indexOf("_metrics.txt") > 0)                      "metrics/$filename"
@@ -1070,8 +1122,6 @@ process dupradar {
 process featureCounts {
     label 'low_memory'
     tag "${bam_featurecounts.baseName - '.sorted'}"
-
-
     publishDir "${params.outdir}/07-featureCounts", mode: 'copy',
         saveAs: {filename ->
             if (filename.indexOf("biotype_counts") > 0) "biotype_counts/$filename"
@@ -1122,8 +1172,6 @@ process featureCounts {
  */
 process merge_featureCounts {
     tag "${input_files[0].baseName - '.sorted'}"
-
-
     publishDir "${params.outdir}/07-featureCounts", mode: 'copy'
 
     input:
@@ -1147,8 +1195,6 @@ process merge_featureCounts {
  */
 process stringtieFPKM {
     tag "${bam_stringtieFPKM.baseName - '.sorted'}"
-
-
     publishDir "${params.outdir}/08-stringtieFPKM", mode: 'copy',
         saveAs: {filename ->
             if (filename.indexOf("transcripts.gtf") > 0) "transcripts/$filename"
@@ -1206,8 +1252,6 @@ process stringtieFPKM {
 process sample_correlation {
     label 'low_memory'
     tag "${input_files[0].toString() - '.sorted_gene.featureCounts.txt' - 'Aligned'}"
-
-
     publishDir "${params.outdir}/09-sample_correlation", mode: 'copy',
       saveAs: {filename ->
         if (filename.indexOf(".command.log") > 0)                      "logs/$filename"
@@ -1248,8 +1292,6 @@ process sample_correlation {
  * STEP 12 MultiQC
  */
 process multiqc {
-
-
     publishDir "${params.outdir}/99-stats/MultiQC", mode: 'copy',
       saveAs: {filename ->
         if (filename.indexOf(".command.log") > 0)                      "logs/$filename"
@@ -1297,8 +1339,6 @@ process multiqc {
  * STEP 13 - Output Description HTML
  */
 process output_documentation {
-
-
     publishDir "${params.outdir}/../DOC/", mode: 'copy'
 
     input:
