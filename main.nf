@@ -473,6 +473,8 @@ if(params.gff){
   process convertGFFtoGTF {
       tag "$gff"
 
+
+
       input:
       file gff from gffFile
 
@@ -517,6 +519,8 @@ if(!params.bed12){
  */
 process fastqc {
     tag "$name"
+
+
     publishDir "${params.outdir}/01-fastqc", mode: 'copy',
         saveAs: {filename ->
         if (filename.indexOf(".zip") > 0) "zips/$filename"
@@ -549,10 +553,11 @@ process fastqc {
 
 /*
  * STEP 2 - Trimmomatic
- */
 process trimming {
     label 'low_memory'
     tag "$prefix"
+
+
     publishDir "${params.outdir}/02-preprocessing", mode: 'copy',
             saveAs: {filename ->
                 if (filename.indexOf("_fastqc") > 0) "FastQC/$filename"
@@ -600,6 +605,7 @@ process trimming {
       """
     }
 }
+*/
 
 
 /*
@@ -802,6 +808,8 @@ if(params.aligner == 'hisat2'){
 process rseqc {
     label 'mid_memory'
     tag "${bam_rseqc.baseName - '.sorted'}"
+
+
     publishDir "${params.outdir}/04-rseqc" , mode: 'copy',
         saveAs: {filename ->
                  if (filename.indexOf("bam_stat.txt") > 0)                      "bam_stat/$filename"
@@ -878,6 +886,8 @@ process rseqc {
  */
 process genebody_coverage {
     label 'mid_memory'
+
+
        publishDir "${params.outdir}/04-rseqc" , mode: 'copy',
         saveAs: {filename ->
             if (filename.indexOf("geneBodyCoverage.curves.pdf") > 0)       "geneBodyCoverage/$filename"
@@ -918,6 +928,8 @@ process genebody_coverage {
  */
 process preseq {
     tag "${bam_preseq.baseName - '.sorted'}"
+
+
     publishDir "${params.outdir}/05-preseq", mode: 'copy',
       saveAs: {filename ->
         if (filename.indexOf(".command.log") > 0)                      "logs/$filename"
@@ -953,6 +965,8 @@ process preseq {
  */
 process markDuplicates {
     tag "${bam.baseName - '.sorted'}"
+
+
     publishDir "${params.outdir}/06-removeDuplicates/picard", mode: 'copy',
         saveAs: {filename ->
         if (filename.indexOf("_metrics.txt") > 0)                      "metrics/$filename"
@@ -1001,6 +1015,8 @@ process markDuplicates {
 process dupradar {
     label 'low_memory'
     tag "${bam_md.baseName - '.sorted.markDups'}"
+
+
     publishDir "${params.outdir}/06-removeDuplicates/dupRadar", mode: 'copy',
         saveAs: {filename ->
             if (filename.indexOf("_duprateExpDens.pdf") > 0) "scatter_plots/$filename"
@@ -1054,6 +1070,8 @@ process dupradar {
 process featureCounts {
     label 'low_memory'
     tag "${bam_featurecounts.baseName - '.sorted'}"
+
+
     publishDir "${params.outdir}/07-featureCounts", mode: 'copy',
         saveAs: {filename ->
             if (filename.indexOf("biotype_counts") > 0) "biotype_counts/$filename"
@@ -1104,6 +1122,8 @@ process featureCounts {
  */
 process merge_featureCounts {
     tag "${input_files[0].baseName - '.sorted'}"
+
+
     publishDir "${params.outdir}/07-featureCounts", mode: 'copy'
 
     input:
@@ -1127,6 +1147,8 @@ process merge_featureCounts {
  */
 process stringtieFPKM {
     tag "${bam_stringtieFPKM.baseName - '.sorted'}"
+
+
     publishDir "${params.outdir}/08-stringtieFPKM", mode: 'copy',
         saveAs: {filename ->
             if (filename.indexOf("transcripts.gtf") > 0) "transcripts/$filename"
@@ -1184,6 +1206,8 @@ process stringtieFPKM {
 process sample_correlation {
     label 'low_memory'
     tag "${input_files[0].toString() - '.sorted_gene.featureCounts.txt' - 'Aligned'}"
+
+
     publishDir "${params.outdir}/09-sample_correlation", mode: 'copy',
       saveAs: {filename ->
         if (filename.indexOf(".command.log") > 0)                      "logs/$filename"
@@ -1224,6 +1248,8 @@ process sample_correlation {
  * STEP 12 MultiQC
  */
 process multiqc {
+
+
     publishDir "${params.outdir}/99-stats/MultiQC", mode: 'copy',
       saveAs: {filename ->
         if (filename.indexOf(".command.log") > 0)                      "logs/$filename"
@@ -1271,6 +1297,8 @@ process multiqc {
  * STEP 13 - Output Description HTML
  */
 process output_documentation {
+
+
     publishDir "${params.outdir}/../DOC/", mode: 'copy'
 
     input:
