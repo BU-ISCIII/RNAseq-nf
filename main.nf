@@ -398,8 +398,7 @@ if(params.aligner == 'star' && !params.star_index && params.fasta){
         tag "$fasta"
         publishDir path: { params.saveReference ? "${params.outdir}/../REFERENCES/star_index" : params.outdir },
                    saveAs: { params.saveReference ? it : null }, mode: 'copy'
-		cpus '20'
-		penv 'openmp'
+
 
         input:
         file fasta from ch_fasta_for_star_index
@@ -454,8 +453,7 @@ if(params.aligner == 'hisat2' && !params.hisat2_index && params.fasta){
         tag "$fasta"
         publishDir path: { params.saveReference ? "${params.outdir}/../REFERENCES/hisat_index" : params.outdir },
                    saveAs: { params.saveReference ? it : null }, mode: 'copy'
-        cpus '20'
-		penv 'openmp'
+
 
         input:
         file fasta from ch_fasta_for_hisat_index
@@ -558,6 +556,7 @@ process fastqc {
 
 /*
  * STEP 2 - Trimmomatic
+ */
 process trimming {
     label 'low_memory'
     tag "$prefix"
@@ -608,12 +607,12 @@ process trimming {
       """
     }
 }
-*/
+
 
 
 /*
  * STEP 2 - Trim Galore!
- */
+
 if (!params.skipTrimming) {
     process trim_galore {
         label 'low_memory'
@@ -663,7 +662,7 @@ if (!params.skipTrimming) {
        .set {trimgalore_reads}
    trimgalore_results = Channel.empty()
 }
-
+ */
 
 
 /*
@@ -704,8 +703,7 @@ if(params.aligner == 'star'){
                 else if (filename.indexOf(".command.err") > 0) "logs/$filename"
                 else null
             }
-        cpus '20'
-		penv 'openmp'
+
 
         input:
         file reads from trimmed_reads
@@ -770,8 +768,7 @@ if(params.aligner == 'hisat2'){
                 else if (params.saveAlignedIntermediates && filename != "where_are_my_files.txt") filename
                 else null
             }
-        cpus '20'
-		penv 'openmp'
+
 
         input:
         file reads from trimmed_reads
@@ -835,8 +832,7 @@ if(params.aligner == 'hisat2'){
                 else if (params.saveAlignedIntermediates && filename != "where_are_my_files.txt") "aligned_sorted/$filename"
                 else null
             }
-        cpus '20'
-		pènv 'openmp'
+        		pènv 'openmp'
 
         input:
         file hisat2_bam
@@ -1082,8 +1078,6 @@ process dupradar {
             else if (filename.indexOf(".command.err") > 0) "logs/$filename"
             else "$filename"
         }
-    cpus '20'
-	penv 'openmp'
 
     when:
     !params.skip_qc && !params.skip_dupradar
