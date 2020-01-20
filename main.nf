@@ -592,6 +592,7 @@ process trimming {
       java -jar $TRIMMOMATIC_PATH/trimmomatic-0.33.jar SE -threads 1 -phred33 $reads $prefix"_filtered_R1.fastq" ILLUMINACLIP:${params.trimmomatic_adapters_file}:${params.trimmomatic_adapters_parameters} SLIDINGWINDOW:${params.trimmomatic_window_length}:${params.trimmomatic_window_value} MINLEN:${params.trimmomatic_mininum_length} 2> ${name}.log
       gzip *.fastq
       fastqc -q *_filtered_*.fastq.gz
+      touch $prefix"_unpaired_R1.fastq.gz"
       mv .command.log ${name}.command.log
       mv .command.sh ${name}.command.sh
       mv .command.err ${name}.command.err
