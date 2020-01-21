@@ -584,7 +584,6 @@ process trimming {
     file '*.command.sh' into trimming_sh
     file '*.command.err' into trimming_err
 
-
     script:
     prefix = name - ~/(_S[0-9]{2})?(_L00[1-9])?(.R1)?(_1)?(_R1)?(_trimmed)?(_val_1)?(_00*)?(\.fq)?(\.fastq)?(\.gz)?$/
     if (params.singleEnd) {
