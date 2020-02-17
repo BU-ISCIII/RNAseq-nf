@@ -248,15 +248,21 @@ else {
     exit 1, "No reference genome specified!"
 }
 
-if( params.gtf ){
-    Channel
-        .fromPath(params.gtf)
-        .ifEmpty { exit 1, "GTF annotation file not found: ${params.gtf}" }
-        .into { gtf_makeSTARindex; gtf_makeHisatSplicesites; gtf_makeHISATindex; gtf_makeBED12;
-              gtf_star; gtf_dupradar; gtf_featureCounts; gtf_stringtieFPKM }
-} else if( params.gff ){
-  gffFile = Channel.fromPath(params.gff)
-                   .ifEmpty { exit 1, "GFF annotation file not found: ${params.gff}" }
+if (params.gtf) {
+  if (params.gff) {
+      // Prefer gtf over gff
+      log.info "Both GTF and GFF have been provided: Using GTF as priority."
+  } else {
+  Channel
+      .fromPath(params.gtf, checkIfExists: true)
+      .ifEmpty { exit 1, "GTF annotation file not found: ${params.gtf}" }
+      .into { gtf_makeSTARindex; gtf_makeHisatSplicesites; gtf_makeHISATindex; gtf_makeSalmonIndex; gtf_makeBED12;
+              gtf_star; gtf_dupradar; gtf_qualimap;  gtf_featureCounts; gtf_stringtieFPKM; gtf_salmon; gtf_salmon_merge }
+
+  }
+} else if (params.gff) {
+    gffFile = Channel.fromPath(params.gff, checkIfExists: true)
+                  .ifEmpty { exit 1, "GFF annotation file not found: ${params.gff}" }
 } else {
     exit 1, "No GTF or GFF3 annotation specified!"
 }
@@ -389,6 +395,26 @@ try {
               "============================================================"
 }
 
+/*
+ * PREPROCESSING - Convert GFF3 to GTF
+ */
+if(params.gff){
+  process convertGFFtoGTF {
+      tag "$gff"
+      input:
+      file gff from gffFile
+
+      output:
+      file "${gff.baseName}.gtf" into gtf_makeSTARindex, gtf_makeHisatSplicesites, gtf_makeHISATindex, gtf_makeBED12,
+            gtf_star, gtf_dupradar, gtf_featureCounts, gtf_stringtieFPKM
+
+      script:
+      """
+      gffread $gff -T -o ${gff.baseName}.gtf
+      """
+  }
+}
+
 
 /*
  * PREPROCESSING - Build STAR index
@@ -474,25 +500,6 @@ if(params.aligner == 'hisat2' && !params.hisat2_index && params.fasta){
         hisat2-build -p 20 $ss $exon $fasta ${fasta.baseName}.hisat2_index
         """
     }
-}
-/*
- * PREPROCESSING - Convert GFF3 to GTF
- */
-if(params.gff){
-  process convertGFFtoGTF {
-      tag "$gff"
-      input:
-      file gff from gffFile
-
-      output:
-      file "${gff.baseName}.gtf" into gtf_makeSTARindex, gtf_makeHisatSplicesites, gtf_makeHISATindex, gtf_makeBED12,
-            gtf_star, gtf_dupradar, gtf_featureCounts, gtf_stringtieFPKM
-
-      script:
-      """
-      gffread $gff -T -o ${gff.baseName}.gtf
-      """
-  }
 }
 
 /*
