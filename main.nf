@@ -57,7 +57,7 @@ def helpMessage() {
     The command to use the ENSEMBL reference is:
     processing_Data/bioinformatics/pipelines/rnaseq-nf/nextflow run /processing_Data/bioinformatics/pipelines/rnaseq-nf/main.nf \\
     --reads "00-reads/*_R{1,2}.fastq.gz" --fasta ../REFERENCES/Homo_sapiens.GRCh38.dna.toplevel.fa --star_index ../REFERENCES/star_index/ \\
-    --gtf ../REFERENCES/Homo_sapiens.GRCh38.98.gtf --saveAlignedIntermediates --fcGroupFeatures gene_id --fcGroupFeaturesType gene_biotype \\
+    --gtf ../REFERENCES/Homo_sapiens.GRCh38.98.gtf --saveAlignedIntermediates --fcGroupFeatures gene_id --fcGroupFeaturesType --fcExtraAttributes gene_name gene_biotype \\
     --service_id SRVIIER197 --outdir ./ -profile hpc_isciii
 
     Mandatory arguments:
@@ -162,7 +162,7 @@ params.saveTrimmed = false
 //Feature Counts
 params.fcGroupFeatures = 'gene_name'
 params.fcGroupFeaturesType = 'gene_name'
-params.fcExtraAttributes = 'gene_name'
+params.fcExtraAttributes = false
 //Skip steps
 params.skip_qc = false
 params.skip_fastqc = false
