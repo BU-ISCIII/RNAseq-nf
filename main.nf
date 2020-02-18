@@ -1254,8 +1254,7 @@ process stringtieFPKM {
         -G $gtf \\
         -A ${prefix}.gene_abund.txt \\
         -C ${prefix}.cov_refs.gtf \\
-        -e \\
-        -b ${prefix}_ballgown
+        -b ${prefix}_ballgown \\
         $ignore_gtf
     mv .command.log ${prefix}.command.log
     mv .command.sh ${prefix}.command.sh
