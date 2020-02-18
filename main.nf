@@ -57,7 +57,7 @@ def helpMessage() {
     The command to use the ENSEMBL reference is:
     processing_Data/bioinformatics/pipelines/rnaseq-nf/nextflow run /processing_Data/bioinformatics/pipelines/rnaseq-nf/main.nf \\
     --reads "00-reads/*_R{1,2}.fastq.gz" --fasta ../REFERENCES/Homo_sapiens.GRCh38.dna.toplevel.fa --star_index ../REFERENCES/star_index/ \\
-    --gtf ../REFERENCES/Homo_sapiens.GRCh38.98.gtf --saveAlignedIntermediates --fcGroupFeatures gene_id --fcGroupFeaturesType --fcExtraAttributes gene_name gene_biotype \\
+    --gtf ../REFERENCES/Homo_sapiens.GRCh38.98.gtf --saveAlignedIntermediates --fcGroupFeatures gene_id --fcExtraAttributes gene_name --fcGroupFeaturesType gene_biotype \\
     --service_id SRVIIER197 --outdir ./ -profile hpc_isciii
 
     Mandatory arguments:
@@ -163,6 +163,8 @@ params.saveTrimmed = false
 params.fcGroupFeatures = 'gene_name'
 params.fcGroupFeaturesType = 'gene_name'
 params.fcExtraAttributes = false
+//StringTie
+params.stringTieIgnoreGTF = false
 //Skip steps
 params.skip_qc = false
 params.skip_fastqc = false
@@ -1193,7 +1195,12 @@ process merge_featureCounts {
     script:
     //if we only have 1 file, just use cat and pipe output to csvtk. Else join all files first, and then remove unwanted column names.
     def single = input_files instanceof Path ? 1 : input_files.size()
-    def merge = (single == 1) ? 'cat' : 'csvtk join -t -f "Geneid,Start,Length,End,Chr,Strand,gene_name"'
+    if (params.fcExtraAttributes == 'gene_name') {
+        def merge = (single == 1) ? 'cat' : 'csvtk join -t -f "Geneid,Start,Length,End,Chr,Strand,gene_name"'
+    } else {
+        def merge = (single == 1) ? 'cat' : 'csvtk join -t -f "Geneid,Start,Length,End,Chr,Strand"'
+    }
+
     """
     $merge $input_files | csvtk cut -t -f "-Start,-Chr,-End,-Length,-Strand" | sed 's/.markDups.bam//g' | sed 's/_filteredAligned.sortedByCoord.out.bam//g' > merged_gene_counts.txt
     """
@@ -1238,6 +1245,7 @@ process stringtieFPKM {
     } else if (reverse_stranded && !unstranded){
         st_direction = "--rf"
     }
+    def ignore_gtf = params.stringTieIgnoreGTF ? "" : "-e"
     """
     stringtie $bam_stringtieFPKM \\
         $st_direction \\
