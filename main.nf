@@ -717,14 +717,12 @@ if(params.aligner == 'star'){
         file reads from trimmed_reads
         file index from star_index.collect()
         file gtf from gtf_star.collect()
-        file wherearemyfiles from ch_where_star.collect()
 
         output:
         set file("*Log.final.out"), file ('*.bam') into star_aligned
         file "*.out" into alignment_logs
         file "*SJ.out.tab"
         file "*Log.out" into star_log
-        file "where_are_my_files.txt"
         file "${prefix}Aligned.sortedByCoord.out.bam.bai" into bam_index_rseqc, bam_index_genebody
         file '*.command.log' into star_command_log
         file '*.command.sh' into star_sh
