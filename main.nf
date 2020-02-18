@@ -163,6 +163,8 @@ params.saveTrimmed = false
 params.fcGroupFeatures = 'gene_name'
 params.fcGroupFeaturesType = 'gene_name'
 params.fcExtraAttributes = false
+//StringTie
+params.stringTieIgnoreGTF = false
 //Skip steps
 params.skip_qc = false
 params.skip_fastqc = false
@@ -1243,6 +1245,7 @@ process stringtieFPKM {
     } else if (reverse_stranded && !unstranded){
         st_direction = "--rf"
     }
+    def ignore_gtf = params.stringTieIgnoreGTF ? "" : "-e"
     """
     stringtie $bam_stringtieFPKM \\
         $st_direction \\
@@ -1253,9 +1256,10 @@ process stringtieFPKM {
         -C ${prefix}.cov_refs.gtf \\
         -e \\
         -b ${prefix}_ballgown
-        mv .command.log ${prefix}.command.log
-        mv .command.sh ${prefix}.command.sh
-        mv .command.err ${prefix}.command.err
+        $ignore_gtf
+    mv .command.log ${prefix}.command.log
+    mv .command.sh ${prefix}.command.sh
+    mv .command.err ${prefix}.command.err
     """
 }
 
