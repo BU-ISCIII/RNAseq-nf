@@ -990,10 +990,8 @@ process genebody_coverage {
 
     script:
     """
-    geneBody_coverage.py \\
-        -i $bam \\
-        -o geneBodyCoverage \\
-        -r $bed12
+    find . -name "*Aligned.sortedByCoord.out.bam" > _00_bam_list
+    geneBody_coverage.py -r $bed12 -i _00_bam_list -o geneBodyCoverage
     """
 }
 
