@@ -151,7 +151,6 @@ params.forward_stranded = false
 params.reverse_stranded = false
 params.unstranded = false
 params.singleEnd = false
-params.pico = false
 //Alignment
 params.aligner = 'star'
 params.seqCenter = false
@@ -183,14 +182,13 @@ params.three_prime_clip_r1 = 0
 params.three_prime_clip_r2 = 0
 params.trim_nextseq = 0
 params.pico = false
-params.saveTrimmed = false
 
 
 // Defaults
-sampleLevel = false
-hisatBuildMemory = 200 // Required amount of memory in GB to build HISAT2 index with splice sites
-readPaths = null
-star_memory = false // Cluster specific param required for hebbe
+params.sampleLevel = false
+params.hisatBuildMemory = 200 // Required amount of memory in GB to build HISAT2 index with splice sites
+params.readPaths = null
+params.star_memory = false // Cluster specific param required for hebbe
 
 // Check if genome exists in the config file
 if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
@@ -929,23 +927,33 @@ process rseqc {
     script:
     prefix = bam_rseqc.baseName - '_filteredAligned.sortedByCoord.out'
     if (params.singleEnd) {
-        paired="SE"
+        """
+        infer_experiment.py -i $bam_rseqc -r $bed12 > ${prefix}.infer_experiment.txt
+        clipping_profile.py -i $bam_rseqc -s "SE" -o ${prefix}
+        junction_annotation.py -i $bam_rseqc -o ${prefix} -r $bed12
+        bam_stat.py -i $bam_rseqc > ${prefix}.bam_stat.txt
+        junction_saturation.py -i $bam_rseqc -o ${prefix} -r $bed12 2> ${prefix}.junction_annotation_log.txt
+        read_distribution.py -i $bam_rseqc -r $bed12 > ${prefix}.read_distribution.txt
+        read_duplication.py -i $bam_rseqc -o ${prefix}.read_duplication
+        mv .command.log ${prefix}.command.log
+        mv .command.sh ${prefix}.command.sh
+        mv .command.err ${prefix}.command.err
+        """
     } else {
-        paired="PE"
+        """
+        infer_experiment.py -i $bam_rseqc -r $bed12 > ${prefix}.infer_experiment.txt
+        clipping_profile.py -i $bam_rseqc -s "PE" -o ${prefix}
+        junction_annotation.py -i $bam_rseqc -o ${prefix} -r $bed12
+        bam_stat.py -i $bam_rseqc > ${prefix}.bam_stat.txt
+        junction_saturation.py -i $bam_rseqc -o ${prefix} -r $bed12 2> ${prefix}.junction_annotation_log.txt
+        inner_distance.py -i $bam_rseqc -o ${prefix} -r $bed12
+        read_distribution.py -i $bam_rseqc -r $bed12 > ${prefix}.read_distribution.txt
+        read_duplication.py -i $bam_rseqc -o ${prefix}.read_duplication
+        mv .command.log ${prefix}.command.log
+        mv .command.sh ${prefix}.command.sh
+        mv .command.err ${prefix}.command.err
+        """
     }
-    """
-    infer_experiment.py -i $bam_rseqc -r $bed12 > ${prefix}.infer_experiment.txt
-    clipping_profile.py -i $bam_rseqc -s $paired -o ${prefix}
-    junction_annotation.py -i $bam_rseqc -o ${prefix} -r $bed12
-    bam_stat.py -i $bam_rseqc > ${prefix}.bam_stat.txt
-    junction_saturation.py -i $bam_rseqc -o ${prefix} -r $bed12 2> ${prefix}.junction_annotation_log.txt
-    inner_distance.py -i $bam_rseqc -o ${prefix} -r $bed12
-    read_distribution.py -i $bam_rseqc -r $bed12 > ${prefix}.read_distribution.txt
-    read_duplication.py -i $bam_rseqc -o ${prefix}.read_duplication
-    mv .command.log ${prefix}.command.log
-    mv .command.sh ${prefix}.command.sh
-    mv .command.err ${prefix}.command.err
-    """
 }
 
 
@@ -970,6 +978,7 @@ process genebody_coverage {
     !params.skip_qc && !params.skip_genebody_coverage
 
     input:
+    file index from bam_index_genebody.collect()
     file bam from bam_forSubsamp.collect()
     file bed12 from bed_genebody_coverage.collect()
 
@@ -981,7 +990,6 @@ process genebody_coverage {
 
     script:
     """
-    samtools index $bam
     geneBody_coverage.py \\
         -i $bam \\
         -o geneBodyCoverage \\
@@ -1054,10 +1062,8 @@ process markDuplicates {
 
     script:
     prefix = bam.baseName - '_filteredAligned.sortedByCoord.out'
-//    markdup_java_options = (task.memory.toGiga() > 8) ? ${params.markdup_java_options} : "\"-Xms" +  (task.memory.toGiga() / 2 )+"g "+ "-Xmx" + (task.memory.toGiga() - 1)+ "g\""
-
     """
-    picard MarkDuplicates \\
+    picard -Djava.io.tmpdir=${params.outdir}../TMP/ MarkDuplicates \\
         INPUT=$bam \\
         OUTPUT=${prefix}.markDups.bam \\
         METRICS_FILE=${prefix}.markDups_metrics.txt \\
@@ -1195,16 +1201,18 @@ process merge_featureCounts {
     script:
     //if we only have 1 file, just use cat and pipe output to csvtk. Else join all files first, and then remove unwanted column names.
     def single = input_files instanceof Path ? 1 : input_files.size()
-    if (params.fcExtraAttributes == 'gene_name') {
-        def merge = (single == 1) ? 'cat' : 'csvtk join -t -f "Geneid,Start,Length,End,Chr,Strand,gene_name"'
+    if (!params.fcExtraAttributes) {
+        merge = 'csvtk join -t -f "Geneid,Start,Length,End,Chr,Strand"'
+    } else if ($single == 1){
+        merge = 'cat'
     } else {
-        def merge = (single == 1) ? 'cat' : 'csvtk join -t -f "Geneid,Start,Length,End,Chr,Strand"'
+        merge = 'csvtk join -t -f "Geneid,Start,Length,End,Chr,Strand,gene_name"'
     }
-
     """
     $merge $input_files | csvtk cut -t -f "-Start,-Chr,-End,-Length,-Strand" | sed 's/.markDups.bam//g' | sed 's/_filteredAligned.sortedByCoord.out.bam//g' > merged_gene_counts.txt
     """
 }
+
 
 
 /*
