@@ -884,6 +884,7 @@ process rseqc {
             else if (filename.indexOf("clipping_profile.xls") > 0)              "clipping_profile/data/$filename"
             else if (filename.indexOf("clipping_profile.R1.pdf") > 0)           "clipping_profile/plots/$filename"
             else if (filename.indexOf("clipping_profile.R2.pdf") > 0)           "clipping_profile/plots/$filename"
+            else if (filename.indexOf("clipping_profile.pdf") > 0)              "clipping_profile/plots/$filename"
             else if (filename.indexOf("read_distribution.txt") > 0)             "read_distribution/$filename"
             else if (filename.indexOf("read_duplication.DupRate_plot.pdf") > 0) "read_duplication/$filename"
             else if (filename.indexOf("read_duplication.DupRate_plot.r") > 0)   "read_duplication/rscripts/$filename"
@@ -907,6 +908,7 @@ process rseqc {
             else if (filename.indexOf(".command.out") > 0)                      "logs/$filename"
             else if (filename.indexOf(".command.sh") > 0)                       "logs/$filename"
             else if (filename.indexOf(".command.err") > 0)                      "logs/$filename"
+            else if (filename.indexOf(".command.log") > 0)                      "logs/$filename"
             else filename
         }
 
