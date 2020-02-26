@@ -1307,8 +1307,8 @@ process sample_correlation {
     script: // This script is bundled with the pipeline, in nfcore/rnaseq/bin/
     """
     edgeR_heatmap_MDS.r $input_files
-    cat $mdsplot_header edgeR_MDS_Aplot_coordinates_mqc.csv >> tmp_file
-    mv tmp_file edgeR_MDS_Aplot_coordinates_mqc.csv
+    cat $mdsplot_header edgeR_MDS_plot_coordinates_mqc.csv >> tmp_file
+    mv tmp_file edgeR_MDS_plot_coordinates_mqc.csv
     cat $heatmap_header log2CPM_sample_distances_mqc.csv >> tmp_file
     mv tmp_file log2CPM_sample_distances_mqc.csv
     """
