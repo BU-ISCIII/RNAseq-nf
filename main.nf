@@ -55,7 +55,7 @@ def helpMessage() {
     nextflow run nf-core/rnaseq --reads '*_R{1,2}.fastq.gz' --genome GRCh37 -profile docker
 
     The command to use the ENSEMBL reference is:
-    processing_Data/bioinformatics/pipelines/rnaseq-nf/nextflow run /processing_Data/bioinformatics/pipelines/rnaseq-nf/main.nf \\
+    /processing_Data/bioinformatics/pipelines/rnaseq-nf/nextflow run /processing_Data/bioinformatics/pipelines/rnaseq-nf/main.nf \\
     --reads "00-reads/*_R{1,2}.fastq.gz" --fasta ../REFERENCES/Homo_sapiens.GRCh38.dna.toplevel.fa --star_index ../REFERENCES/star_index/ \\
     --gtf ../REFERENCES/Homo_sapiens.GRCh38.98.gtf --saveAlignedIntermediates --fcGroupFeatures gene_id --fcExtraAttributes gene_name --fcGroupFeaturesType gene_biotype \\
     --service_id SRVIIER197 --outdir ./ -profile hpc_isciii
@@ -145,7 +145,6 @@ params.service_id = false
 //References
 params.genome = false
 params.genomes = false
-params.readPaths = false
 //Library data
 params.forward_stranded = false
 params.reverse_stranded = false
@@ -619,61 +618,6 @@ process trimming {
     }
 }
 
-
-
-/*
- * STEP 2 - Trim Galore!
-
-if (!params.skipTrimming) {
-    process trim_galore {
-        label 'low_memory'
-        tag "$name"
-        publishDir "${params.outdir}/trim_galore", mode: 'copy',
-            saveAs: {filename ->
-                if (filename.indexOf("_fastqc") > 0) "FastQC/$filename"
-                else if (filename.indexOf("trimming_report.txt") > 0) "logs/$filename"
-                else if (params.saveTrimmed && filename.indexOf(".fq.gz")) "trimmed/$filename"
-                else null
-            }
-
-        input:
-        set val(name), file(reads) from raw_reads_trimming
-        file wherearemyfiles from ch_where_trim_galore.collect()
-
-        output:
-        set val(name), file("*fastq.gz") into trimmed_reads
-        file "*_report.txt" into trimmomatic_results
-        file "*_fastqc.{zip,html}" into trimmomatic_fastqc_reports
-        file "where_are_my_files.txt"
-
-
-        script:
-        prefix = name - ~/(_S[0-9]{2})?(_L00[1-9])?(.R1)?(_1)?(_R1)?(_trimmed)?(_val_1)?(_00*)?(\.fq)?(\.fastq)?(\.gz)?$/
-        c_r1 = params.clip_r1 > 0 ? "--clip_r1 ${params.clip_r1}" : ''
-        c_r2 = params.clip_r2 > 0 ? "--clip_r2 ${clip_r2}" : ''
-        tpc_r1 = params.three_prime_clip_r1 > 0 ? "--three_prime_clip_r1 ${params.three_prime_clip_r1}" : ''
-        tpc_r2 = params.three_prime_clip_r2 > 0 ? "--three_prime_clip_r2 ${params.three_prime_clip_r2}" : ''
-        nextseq = params.trim_nextseq > 0 ? "--nextseq ${params.trim_nextseq}" : ''
-        if (params.singleEnd) {
-            """
-            trim_galore --phred33 --fastqc --gzip $c_r1 $tpc_r1 $nextseq $reads
-            rename $prefix"_R1_trimmed.fq.gz $prefix"_filtered_R1.fastq.gz"
-            rename $prefix"_R1_trimmed_fastqc.zip $prefix"_filtered_R1_fastqc.zip"
-            rename $prefix"_R1.fastq.gz_trimming_report.txt $prefix"_filtered_R1_report.txt"
-            rename $prefix"_R1_trimmed_fastqc.html $prefix"_filtered_R1_fastqc.html
-            """
-        } else {
-            """
-            trim_galore --paired --phred33 --fastqc --gzip $c_r1 $c_r2 $tpc_r1 $tpc_r2 $nextseq $reads
-            """
-        }
-    }
-}else{
-   raw_reads_trimming
-       .set {trimgalore_reads}
-   trimgalore_results = Channel.empty()
-}
- */
 
 
 /*
