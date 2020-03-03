@@ -58,7 +58,7 @@ def helpMessage() {
     nextflow run ${path_to_rnaseq_repo}/main.nf \\
     --reads "00-reads/*_R{1,2}.fastq.gz" --fasta ${path_to_reference_fasta_file} --star_index ${path_to_star_index} \\
     --gtf ${path_to_gtf_file} --saveAlignedIntermediates --fcGroupFeatures gene_id --fcExtraAttributes gene_name --fcGroupFeaturesType gene_biotype \\
-    --service_id {service_name} --outdir ${path_to_output_directory} -profile hpc_isciii
+    --service_id {service_name} --outdir ${path_to_output_directory} -profile {your_profile_name}
 
     Mandatory arguments:
       --reads                       Path to input data (must be surrounded with quotes)
