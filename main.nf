@@ -536,6 +536,7 @@ if(!params.bed12){
  */
 process fastqc {
     tag "$name"
+    label 'process_medium'
     publishDir "${params.outdir}/01-fastqc", mode: 'copy',
         saveAs: {filename ->
         if (filename.indexOf(".zip") > 0) "zips/$filename"
@@ -558,7 +559,7 @@ process fastqc {
 
     script:
     """
-    fastqc -q $reads
+    fastqc --quiet --threads $task.cpus $reads
     mv .command.out ${name}.command.out
     mv .command.sh ${name}.command.sh
     mv .command.err ${name}.command.err
@@ -570,8 +571,8 @@ process fastqc {
  * STEP 2 - Trimmomatic
  */
 process trimming {
-    label 'low_memory'
     tag "$prefix"
+    label 'process_medium'
     publishDir "${params.outdir}/02-preprocessing", mode: 'copy',
             saveAs: {filename ->
                 if (filename.indexOf("_fastqc") > 0) "FastQC/$filename"
@@ -600,9 +601,9 @@ process trimming {
     prefix = name - ~/(_S[0-9]{2})?(_L00[1-9])?(.R1)?(_1)?(_R1)?(_trimmed)?(_val_1)?(_00*)?(\.fq)?(\.fastq)?(\.gz)?$/
     if (params.singleEnd) {
       """
-      java -jar $TRIMMOMATIC_PATH/trimmomatic-0.33.jar SE -threads 1 -phred33 $reads $prefix"_filtered_R1.fastq" ILLUMINACLIP:${params.trimmomatic_adapters_file}:${params.trimmomatic_adapters_parameters} SLIDINGWINDOW:${params.trimmomatic_window_length}:${params.trimmomatic_window_value} MINLEN:${params.trimmomatic_mininum_length} 2> ${name}.log
+      java -jar $TRIMMOMATIC_PATH/trimmomatic-0.33.jar SE -threads $task.cpus -phred33 $reads $prefix"_filtered_R1.fastq" ILLUMINACLIP:${params.trimmomatic_adapters_file}:${params.trimmomatic_adapters_parameters} SLIDINGWINDOW:${params.trimmomatic_window_length}:${params.trimmomatic_window_value} MINLEN:${params.trimmomatic_mininum_length} 2> ${name}.log
       gzip *.fastq
-      fastqc -q *_filtered_*.fastq.gz
+      fastqc --quiet --threads $task.cpus *_filtered_*.fastq.gz
       touch $prefix"_unpaired_R1.fastq.gz"
       mv .command.log ${name}.command.log
       mv .command.sh ${name}.command.sh
@@ -610,9 +611,9 @@ process trimming {
       """
     } else {
       """
-      java -jar $TRIMMOMATIC_PATH/trimmomatic-0.33.jar PE -threads 1 -phred33 $reads $prefix"_filtered_R1.fastq" $prefix"_unpaired_R1.fastq" $prefix"_filtered_R2.fastq" $prefix"_unpaired_R2.fastq" ILLUMINACLIP:${params.trimmomatic_adapters_file}:${params.trimmomatic_adapters_parameters} SLIDINGWINDOW:${params.trimmomatic_window_length}:${params.trimmomatic_window_value} MINLEN:${params.trimmomatic_mininum_length} 2> ${name}.log
+      java -jar $TRIMMOMATIC_PATH/trimmomatic-0.33.jar PE -threads $task.cpus -phred33 $reads $prefix"_filtered_R1.fastq" $prefix"_unpaired_R1.fastq" $prefix"_filtered_R2.fastq" $prefix"_unpaired_R2.fastq" ILLUMINACLIP:${params.trimmomatic_adapters_file}:${params.trimmomatic_adapters_parameters} SLIDINGWINDOW:${params.trimmomatic_window_length}:${params.trimmomatic_window_value} MINLEN:${params.trimmomatic_mininum_length} 2> ${name}.log
       gzip *.fastq
-      fastqc -q *_filtered_*.fastq.gz
+      fastqc --quiet --threads $task.cpus *_filtered_*.fastq.gz
       mv .command.log ${name}.command.log
       mv .command.sh ${name}.command.sh
       mv .command.err ${name}.command.err
@@ -660,9 +661,6 @@ if(params.aligner == 'star'){
                 else if (filename.indexOf(".command.err") > 0) "logs/$filename"
                 else null
             }
-        cpus '20'
-        penv 'openmp'
-
 
         input:
         file reads from trimmed_reads
@@ -688,7 +686,7 @@ if(params.aligner == 'star'){
         STAR --genomeDir $index \\
             --sjdbGTFfile $gtf \\
             --readFilesIn $reads  \\
-            --runThreadN 20 \\
+            --runThreadN $task.cpus \\
             --twopassMode Basic \\
             --outWigType bedGraph \\
             --outSAMtype BAM SortedByCoordinate $avail_mem \\
@@ -725,9 +723,6 @@ if(params.aligner == 'hisat2'){
                 else if (params.saveAlignedIntermediates && filename != "where_are_my_files.txt") filename
                 else null
             }
-        cpus '20'
-        penv 'openmp'
-
 
         input:
         file reads from trimmed_reads
@@ -773,7 +768,7 @@ if(params.aligner == 'hisat2'){
                    --known-splicesite-infile $alignment_splicesites \\
                    --no-mixed \\
                    --no-discordant \\
-                   -p 20 \\
+                   -p $task.cpus \\
                    --met-stderr \\
                    --new-summary \\
                    --summary-file ${prefix}.hisat2_summary.txt \\
@@ -783,7 +778,7 @@ if(params.aligner == 'hisat2'){
     }
 
     process hisat2_sortOutput {
-        label 'mid_memory'
+        label 'high_memory'
         tag "${hisat2_bam.baseName}"
         publishDir "${params.outdir}/HISAT2", mode: 'copy',
             saveAs: { filename ->
@@ -791,8 +786,6 @@ if(params.aligner == 'hisat2'){
                 else if (params.saveAlignedIntermediates && filename != "where_are_my_files.txt") "aligned_sorted/$filename"
                 else null
             }
-        cpus '20'
-        penv 'openmp'
 
         input:
         file hisat2_bam
@@ -809,7 +802,7 @@ if(params.aligner == 'hisat2'){
         """
         samtools sort \\
             $hisat2_bam \\
-            -@ 20 ${avail_mem} \\
+            -@ $task.cpus ${avail_mem} \\
             -o ${hisat2_bam.baseName}.sorted.bam
         samtools index ${hisat2_bam.baseName}.sorted.bam
         """
@@ -820,7 +813,6 @@ if(params.aligner == 'hisat2'){
  * STEP 4 - RSeQC analysis
  */
 process rseqc {
-    label 'mid_memory'
     tag "${bam_rseqc.baseName - '.sorted'}"
     publishDir "${params.outdir}/04-rseqc" , mode: 'copy',
         saveAs: {filename ->
@@ -909,7 +901,6 @@ process rseqc {
  * Step 4.2 Rseqc genebody_coverage
  */
 process genebody_coverage {
-    label 'mid_memory'
        publishDir "${params.outdir}/04-rseqc" , mode: 'copy',
         saveAs: {filename ->
             if (filename.indexOf("geneBodyCoverage.curves.pdf") > 0)       "geneBodyCoverage/$filename"
@@ -1009,7 +1000,7 @@ process markDuplicates {
     script:
     prefix = bam.baseName - '_filteredAligned.sortedByCoord.out'
     """
-    picard -Djava.io.tmpdir=${params.outdir}../TMP/ MarkDuplicates \\
+    picard -Djava.io.tmpdir=${params.outdir}../../TMP/ MarkDuplicates \\
         INPUT=$bam \\
         OUTPUT=${prefix}.markDups.bam \\
         METRICS_FILE=${prefix}.markDups_metrics.txt \\
@@ -1029,7 +1020,7 @@ process markDuplicates {
  * STEP 7 - dupRadar
  */
 process dupradar {
-    label 'low_memory'
+    label 'high_memory'
     tag "${bam_md.baseName - '.sorted.markDups'}"
 
 
@@ -1046,8 +1037,6 @@ process dupradar {
             else if (filename.indexOf(".command.err") > 0) "logs/$filename"
             else "$filename"
         }
-    cpus '20'
-    penv 'openmp'
 
     when:
     !params.skip_qc && !params.skip_dupradar
@@ -1072,7 +1061,7 @@ process dupradar {
     }
     def paired = params.singleEnd ? 'single' :  'paired'
     """
-    dupRadar.r $bam_md $gtf $dupradar_direction $paired 20
+    dupRadar.r $bam_md $gtf $dupradar_direction $paired $task.cpus
     mv .command.log ${prefix}.command.log
     mv .command.sh ${prefix}.command.sh
     mv .command.err ${prefix}.command.err
@@ -1084,7 +1073,6 @@ process dupradar {
  * STEP 8 Feature counts
  */
 process featureCounts {
-    label 'low_memory'
     tag "${bam_featurecounts.baseName - '.sorted'}"
     publishDir "${params.outdir}/07-featureCounts", mode: 'copy',
         saveAs: {filename ->
@@ -1147,11 +1135,12 @@ process merge_featureCounts {
     script:
     //if we only have 1 file, just use cat and pipe output to csvtk. Else join all files first, and then remove unwanted column names.
     def single = input_files instanceof Path ? 1 : input_files.size()
-    if (!params.fcExtraAttributes) {
-      def merge = (single == 1) ? 'cat' : 'csvtk join -t -f "Geneid,Start,Length,End,Chr,Strand"'
-    } else{
-      def merge = (single == 1) ? 'cat' : 'csvtk join -t -f "Geneid,Start,Length,End,Chr,Strand,${params.fcExtraAttributes}"'
-    }
+    def merge = (single == 1) ? 'cat' : 'csvtk join -t -f "Geneid,Start,Length,End,Chr,Strand"'
+//    if (!params.fcExtraAttributes) {
+//      def merge = (single == 1) ? 'cat' : 'csvtk join -t -f "Geneid,Start,Length,End,Chr,Strand"'
+//    } else{
+//      def merge = (single == 1) ? 'cat' : 'csvtk join -t -f "Geneid,Start,Length,End,Chr,Strand,${params.fcExtraAttributes}"'
+//    }
     """
     $merge $input_files | csvtk cut -t -f "-Start,-Chr,-End,-Length,-Strand" | sed 's/.markDups.bam//g' | sed 's/_filteredAligned.sortedByCoord.out.bam//g' > merged_gene_counts.txt
     """
@@ -1220,7 +1209,6 @@ process stringtieFPKM {
  * STEP 11 - edgeR MDS and heatmap
  */
 process sample_correlation {
-    label 'low_memory'
     tag "${input_files[0].toString() - '.sorted_gene.featureCounts.txt' - 'Aligned'}"
     publishDir "${params.outdir}/09-sample_correlation", mode: 'copy',
       saveAs: {filename ->
@@ -1310,7 +1298,7 @@ process multiqc {
  * STEP 13 - Output Description HTML
  */
 process output_documentation {
-    publishDir "${params.outdir}/../DOC/", mode: 'copy'
+    publishDir "${params.outdir}/../../DOC/", mode: 'copy'
 
     input:
     file output_docs from ch_output_docs
