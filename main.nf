@@ -901,6 +901,7 @@ process rseqc {
  * Step 4.2 Rseqc genebody_coverage
  */
 process genebody_coverage {
+      label 'process_long'
        publishDir "${params.outdir}/04-rseqc" , mode: 'copy',
         saveAs: {filename ->
             if (filename.indexOf("geneBodyCoverage.curves.pdf") > 0)       "geneBodyCoverage/$filename"
@@ -1153,6 +1154,7 @@ process merge_featureCounts {
  */
 process stringtieFPKM {
     tag "${bam_stringtieFPKM.baseName - '.sorted'}"
+    label 'process_long'
     publishDir "${params.outdir}/08-stringtieFPKM", mode: 'copy',
         saveAs: {filename ->
             if (filename.indexOf("transcripts.gtf") > 0) "transcripts/$filename"
@@ -1196,6 +1198,7 @@ process stringtieFPKM {
         -A ${prefix}.gene_abund.txt \\
         -C ${prefix}.cov_refs.gtf \\
         -b ${prefix}_ballgown \\
+        -p $task.cpus \\
         $ignore_gtf
     mv .command.log ${prefix}.command.log
     mv .command.sh ${prefix}.command.sh
