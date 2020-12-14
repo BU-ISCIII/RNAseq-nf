@@ -258,7 +258,7 @@ if (params.gtf) {
       .fromPath(params.gtf, checkIfExists: true)
       .ifEmpty { exit 1, "GTF annotation file not found: ${params.gtf}" }
       .into { gtf_makeSTARindex; gtf_makeHisatSplicesites; gtf_makeHISATindex; gtf_makeSalmonIndex; gtf_makeBED12;
-              gtf_star; gtf_dupradar; gtf_qualimap;  gtf_featureCounts; gtf_stringtieFPKM; gtf_salmon; gtf_salmon_merge }
+              gtf_star; gtf_dupradar; gtf_qualimap;  gtf_featureCounts; gtf_BiotypefeatureCounts; gtf_stringtieFPKM; gtf_salmon; gtf_salmon_merge }
 
   }
 } else if (params.gff) {
@@ -407,7 +407,7 @@ if(params.gff){
 
       output:
       file "${gff.baseName}.gtf" into gtf_makeSTARindex, gtf_makeHisatSplicesites, gtf_makeHISATindex, gtf_makeBED12,
-            gtf_star, gtf_dupradar, gtf_featureCounts, gtf_stringtieFPKM
+            gtf_star, gtf_dupradar, gtf_featureCounts, gtf_BiotypefeatureCounts, gtf_stringtieFPKM
 
       script:
       """
@@ -690,6 +690,7 @@ if(params.aligner == 'star'){
             --twopassMode Basic \\
             --outWigType bedGraph \\
             --outSAMtype BAM SortedByCoordinate $avail_mem \\
+            --outBAMsortingBinsN 25 \\
             --readFilesCommand zcat \\
             --runDirPerm All_RWX \\
             --outFileNamePrefix $prefix $seqCenter
@@ -704,7 +705,7 @@ if(params.aligner == 'star'){
     star_aligned
         .filter { logs, bams -> check_log(logs) }
         .flatMap {  logs, bams -> bams }
-    .into { bam_count; bam_rseqc; bam_preseq; bam_markduplicates; bam_featurecounts; bam_stringtieFPKM; bam_forSubsamp; bam_skipSubsamp  }
+    .into { bam_count; bam_rseqc; bam_preseq; bam_markduplicates; bam_featurecounts; bam_Biotypefeaturecounts; bam_stringtieFPKM; bam_forSubsamp; bam_skipSubsamp  }
 }
 
 
@@ -792,7 +793,7 @@ if(params.aligner == 'hisat2'){
         file wherearemyfiles from ch_where_hisat2_sort.collect()
 
         output:
-        file "${hisat2_bam.baseName}.sorted.bam" into bam_count, bam_rseqc, bam_preseq, bam_markduplicates, bam_featurecounts, bam_stringtieFPKM,bam_forSubsamp, bam_skipSubsamp
+        file "${hisat2_bam.baseName}.sorted.bam" into bam_count, bam_rseqc, bam_preseq, bam_markduplicates, bam_featurecounts, bam_Biotypefeaturecounts, bam_stringtieFPKM,bam_forSubsamp, bam_skipSubsamp
         file "${hisat2_bam.baseName}.sorted.bam.bai" into bam_index_rseqc, bam_index_genebody
         file "where_are_my_files.txt"
 
@@ -1089,12 +1090,10 @@ process featureCounts {
     input:
     file bam_featurecounts
     file gtf from gtf_featureCounts.collect()
-    file biotypes_header from ch_biotypes_header.collect()
 
     output:
     file "${sample_name}_gene.featureCounts.txt" into geneCounts, featureCounts_to_merge
     file "${sample_name}_gene.featureCounts.txt.summary" into featureCounts_logs
-    file "${sample_name}_biotype_counts*mqc.{txt,tsv}" into featureCounts_biotype
     file '*.command.log' into feature_counts_log
     file '*.command.sh' into feature_counts_sh
     file '*.command.err' into feature_counts_err
@@ -1111,6 +1110,48 @@ process featureCounts {
     sample_name = bam_featurecounts.baseName - '_filteredAligned.sortedByCoord.out'
     """
     featureCounts -a $gtf -g ${params.fcGroupFeatures} -o ${sample_name}_gene.featureCounts.txt $extraAttributes -p -s $featureCounts_direction $bam_featurecounts
+    mv .command.log ${sample_name}.command.log
+    mv .command.sh ${sample_name}.command.sh
+    mv .command.err ${sample_name}.command.err
+    """
+}
+
+
+/*
+ * STEP 8.2 Biotype Feature counts
+ */
+process BiotypefeatureCounts {
+    tag "${bam_Biotypefeaturecounts.baseName - '.sorted'}"
+    publishDir "${params.outdir}/07-featureCounts", mode: 'copy',
+        saveAs: {filename ->
+            if (filename.indexOf("biotype_counts") > 0) "biotype_counts/$filename"
+            else "$filename"
+        }
+    when:
+    params.fcGroupFeaturesType == 'gene_biotype'
+
+    input:
+    file bam_Biotypefeaturecounts
+    file gtf from gtf_BiotypefeatureCounts.collect()
+    file biotypes_header from ch_biotypes_header.collect()
+
+    output:
+    file "${sample_name}_biotype_counts*mqc.{txt,tsv}" into featureCounts_biotype
+    file '*.command.log' into biotype_counts_log
+    file '*.command.sh' into biotype_counts_sh
+    file '*.command.err' into biotype_counts_err
+
+    script:
+    def featureCounts_direction = 0
+    def extraAttributes = params.fcExtraAttributes ? "--extraAttributes ${params.fcExtraAttributes}" : ''
+    if (forward_stranded && !unstranded) {
+        featureCounts_direction = 1
+    } else if (reverse_stranded && !unstranded){
+        featureCounts_direction = 2
+    }
+    // Try to get real sample name
+    sample_name = bam_featurecounts.baseName - '_filteredAligned.sortedByCoord.out'
+    """
     featureCounts -a $gtf -g ${params.fcGroupFeaturesType} -o ${sample_name}_biotype.featureCounts.txt -p -s $featureCounts_direction $bam_featurecounts
     cut -f 1,7 ${sample_name}_biotype.featureCounts.txt | tail -n +3 | cat $biotypes_header - >> ${sample_name}_biotype_counts_mqc.txt
     mqc_features_stat.py ${sample_name}_biotype_counts_mqc.txt -s $sample_name -f rRNA -o ${sample_name}_biotype_counts_gs_mqc.tsv
@@ -1119,6 +1160,7 @@ process featureCounts {
     mv .command.err ${sample_name}.command.err
     """
 }
+
 
 /*
  * STEP 9 - Merge featurecounts
@@ -1136,9 +1178,10 @@ process merge_featureCounts {
     script:
     //if we only have 1 file, just use cat and pipe output to csvtk. Else join all files first, and then remove unwanted column names.
     def single = input_files instanceof Path ? 1 : input_files.size()
-    def merge = (single == 1) ? 'cat' : 'csvtk join -t -f "Geneid,Start,Length,End,Chr,Strand"'
+//    def merge = (single == 1) ? 'cat' : 'csvtk join -t -f "Geneid,Start,Length,End,Chr,Strand"'
+//    def merge = (single == 1) ? 'cat' : 'csvtk join -t -f "Geneid,Start,Length,End,Chr,Strand,${params.fcExtraAttributes}"'
 //    if (!params.fcExtraAttributes) {
-//      def merge = (single == 1) ? 'cat' : 'csvtk join -t -f "Geneid,Start,Length,End,Chr,Strand"'
+      def merge = (single == 1) ? 'cat' : 'csvtk join -t -f "Geneid,Start,Length,End,Chr,Strand"'
 //    } else{
 //      def merge = (single == 1) ? 'cat' : 'csvtk join -t -f "Geneid,Start,Length,End,Chr,Strand,${params.fcExtraAttributes}"'
 //    }
@@ -1276,7 +1319,7 @@ process multiqc {
     file ('preseq/*') from preseq_results.collect().ifEmpty([])
     file ('dupradar/*') from dupradar_results.collect().ifEmpty([])
     file ('featureCounts/*') from featureCounts_logs.collect()
-    file ('featureCounts_biotype/*') from featureCounts_biotype.collect()
+    file ('featureCounts_biotype/*') from featureCounts_biotype.collect().ifEmpty([])
     file ('stringtie/stringtie_log*') from stringtie_log.collect()
     file ('sample_correlation_results/*') from sample_correlation_results.collect().ifEmpty([]) // If the Edge-R is not run create an Empty array
 
