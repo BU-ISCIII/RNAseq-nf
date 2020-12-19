@@ -1229,7 +1229,6 @@ process stringtieFPKM {
     } else if (reverse_stranded && !unstranded){
         st_direction = "--rf"
     }
-    def ignore_gtf = params.stringTieIgnoreGTF ? "" : "-e"
     """
     stringtie $bam_stringtieFPKM \\
         $st_direction \\
@@ -1240,10 +1239,59 @@ process stringtieFPKM {
         -C ${prefix}.cov_refs.gtf \\
         -b ${prefix}_ballgown \\
         -p $task.cpus \\
-        $ignore_gtf
+        -e
     mv .command.log ${prefix}.command.log
     mv .command.sh ${prefix}.command.sh
     mv .command.err ${prefix}.command.err
+    """
+}
+
+/*
+ * STEP 10.2 - stringtie New Splicing
+ */
+process stringtieSplice {
+    tag "${bam_stringtieSplice.baseName - '.sorted'}"
+    label 'process_long'
+    publishDir "${params.outdir}/10-stringtieSplice", mode: 'copy',
+        saveAs: {filename ->
+            if (filename.indexOf("transcripts.gtf") > 0) "transcripts/$filename"
+            else if (filename.indexOf("cov_refs.gtf") > 0) "cov_refs/$filename"
+            else if (filename.indexOf("ballgown") > 0) "ballgown/$filename"
+            else "$filename"
+        }
+
+    input:
+    file bam_stringtieSplice
+    file gtf from gtf_stringtieSplice.collect()
+
+    when:
+    params.stringTieIgnoreGTF
+
+    output:
+    file "${prefix}_transcripts.gtf"
+    file "${prefix}.gene_abund.txt"
+    file "${prefix}.cov_refs.gtf"
+    file "${prefix}_ballgown"
+
+
+    script:
+    prefix = bam_stringtieSplice.baseName - '_filteredAligned.sortedByCoord.out'
+    def st_direction = ''
+    if (forward_stranded && !unstranded){
+        st_direction = "--fr"
+    } else if (reverse_stranded && !unstranded){
+        st_direction = "--rf"
+    }
+    """
+    stringtie $bam_stringtieSplice \\
+        $st_direction \\
+        -o ${prefix}_transcripts.gtf \\
+        -v \\
+        -G $gtf \\
+        -A ${prefix}.gene_abund.txt \\
+        -C ${prefix}.cov_refs.gtf \\
+        -b ${prefix}_ballgown \\
+        -p $task.cpus
     """
 }
 
