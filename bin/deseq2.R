@@ -89,18 +89,18 @@ dev.off()
 
 
 #############PCA PLOTS################
-pcaData <- plotPCA(rld, intgroup=c("Condition"), returnData=TRUE)
-pcaData_2 <- plotPCA(vsd, intgroup=c("Condition"), returnData=TRUE)
+pcaData <- plotPCA(rld, intgroup=c(compare_col), returnData=TRUE)
+pcaData_2 <- plotPCA(vsd, intgroup=c(compare_col), returnData=TRUE)
 percentVar <- round(100 * attr(pcaData, "percentVar"))
 pdf(file="plotPCA.pdf")
-ggplot(pcaData, aes(PC1, PC2, color=Condition)) +
+ggplot(pcaData, aes_string("PC1", "PC2", color=compare_col)) +
   geom_point(size=3) +
   xlab(paste0("PC1: ",percentVar[1],"% variance")) +
   ylab(paste0("PC2: ",percentVar[2],"% variance")) +
   geom_text(aes(label = name), color = "black", size=2, position = position_nudge(y = 0.8)) +
   labs(title="PCA: rlog") +
   coord_fixed()
-ggplot(pcaData_2, aes(PC1, PC2, color=Condition)) +
+ggplot(pcaData_2, aes_string("PC1", "PC2", color=compare_col)) +
   geom_point(size=3) +
   xlab(paste0("PC1: ",percentVar[1],"% variance")) +
   ylab(paste0("PC2: ",percentVar[2],"% variance")) +
@@ -141,8 +141,8 @@ dev.off()
 ##############PHEATMAP##############
 select <- order(rowMeans(counts(dds,normalized=TRUE)),
                 decreasing=TRUE)[1:20]
-df <- as.data.frame(colData(dds)[,c("Condition")])
-colnames(df) <- c("Condition")
+df <- as.data.frame(colData(dds)[,c(compare_col)])
+colnames(df) <- c(compare_col)
 rownames(df) <- colnames(ntd)
 pdf(file="heatmapCount_top20.pdf")
 pheatmap(assay(ntd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
