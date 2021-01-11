@@ -901,6 +901,7 @@ process rseqc {
 /*
  * Step 4.2 Rseqc genebody_coverage
  */
+
 process genebody_coverage {
       label 'process_long'
        publishDir "${params.outdir}/04-rseqc" , mode: 'copy',
@@ -1358,10 +1359,10 @@ process multiqc {
     file ('trimommatic/*') from trimmomatic_results.collect().ifEmpty([])
     file ('trimommatic/*') from trimmomatic_fastqc_reports.collect().ifEmpty([])
     file ('alignment/*') from alignment_logs.collect().ifEmpty([])
-    file ('rseqc/*') from rseqc_results.collect().ifEmpty([]).ifEmpty([])
+    file ('rseqc/*') from rseqc_results.collect().ifEmpty([])
     file ('rseqc/*') from genebody_coverage_results.collect().ifEmpty([])
-    file ('preseq/*') from preseq_results.collect().ifEmpty([]).ifEmpty([])
-    file ('dupradar/*') from dupradar_results.collect().ifEmpty([]).ifEmpty([])
+    file ('preseq/*') from preseq_results.collect().ifEmpty([])
+    file ('dupradar/*') from dupradar_results.collect().ifEmpty([])
     file ('featureCounts/*') from featureCounts_logs.collect().ifEmpty([])
     file ('featureCounts_biotype/*') from featureCounts_biotype.collect().ifEmpty([])
     file ('stringtie/stringtie_log*') from stringtie_log.collect().ifEmpty([])
