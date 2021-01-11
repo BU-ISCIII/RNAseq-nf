@@ -36,7 +36,12 @@ colnames(cts) <- header_with_underscore
 gene_ids <- cts[,1]
 rownames(cts) <- gene_ids
 
-coldata <- read.table(pasAnno, sep = "\t", header = T, row.names = 1)
+coldata_1 <- read.table(pasAnno, sep = "\t", header = T, row.names = 1)
+
+col_num <- which(colnames(coldata_1) %in% compare_col)
+coldata <- coldata_1[,col_num, drop = FALSE]
+colnames(coldata) <- c("Condition")
+#coldata_2 <- df[!grepl("-", coldata$Condition),]
 
 #all(rownames(coldata) %in% colnames(cts)) #test if the have same name
 cts <- cts[, rownames(coldata)] #order the colums of cts to be the same as in coldata
@@ -48,12 +53,12 @@ mode(cts) <- "integer" #convert values to integer
 #####DIFERENTIAL EXPRESSION###################
 dds_full <- DESeqDataSetFromMatrix(countData = cts,
                                    colData = coldata,
-                                   design = formula(paste("~",compare_col)))
+                                   design = formula(paste("~","Condition")))
 featureData <- data.frame(gene=rownames(cts))
 mcols(dds_full) <- DataFrame(mcols(dds_full), featureData)
 dds <- dds_full[ rowSums(counts(dds_full)) >= 1, ]
 dds <- DESeq(dds)
-res <- results(dds,contrast = c(compare_col,compare_char1,compare_char2))
+res <- results(dds,contrast = c("Condition",compare_char1,compare_char2))
 mcols(res, use.names=TRUE)
 
 DE_results <- as.data.frame(res)
@@ -89,18 +94,18 @@ dev.off()
 
 
 #############PCA PLOTS################
-pcaData <- plotPCA(rld, intgroup=c(compare_col), returnData=TRUE)
-pcaData_2 <- plotPCA(vsd, intgroup=c(compare_col), returnData=TRUE)
+pcaData <- plotPCA(rld, intgroup=c("Condition"), returnData=TRUE)
+pcaData_2 <- plotPCA(vsd, intgroup=c("Condition"), returnData=TRUE)
 percentVar <- round(100 * attr(pcaData, "percentVar"))
 pdf(file="plotPCA.pdf")
-ggplot(pcaData, aes_string("PC1", "PC2", color=compare_col)) +
+ggplot(pcaData, aes(PC1, PC2, color=Condition)) +
   geom_point(size=3) +
   xlab(paste0("PC1: ",percentVar[1],"% variance")) +
   ylab(paste0("PC2: ",percentVar[2],"% variance")) +
   geom_text(aes(label = name), color = "black", size=2, position = position_nudge(y = 0.8)) +
   labs(title="PCA: rlog") +
   coord_fixed()
-ggplot(pcaData_2, aes_string("PC1", "PC2", color=compare_col)) +
+ggplot(pcaData_2, aes(PC1, PC2, color=Condition)) +
   geom_point(size=3) +
   xlab(paste0("PC1: ",percentVar[1],"% variance")) +
   ylab(paste0("PC2: ",percentVar[2],"% variance")) +
@@ -141,8 +146,8 @@ dev.off()
 ##############PHEATMAP##############
 select <- order(rowMeans(counts(dds,normalized=TRUE)),
                 decreasing=TRUE)[1:20]
-df <- as.data.frame(colData(dds)[,c(compare_col)])
-colnames(df) <- c(compare_col)
+df <- as.data.frame(colData(dds)[,c("Condition")])
+colnames(df) <- c("Condition")
 rownames(df) <- colnames(ntd)
 pdf(file="heatmapCount_top20.pdf")
 pheatmap(assay(ntd)[select,], cluster_rows=FALSE, show_rownames=TRUE,
