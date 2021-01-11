@@ -39,9 +39,10 @@ rownames(cts) <- gene_ids
 coldata_1 <- read.table(pasAnno, sep = "\t", header = T, row.names = 1)
 
 col_num <- which(colnames(coldata_1) %in% compare_col)
-coldata <- coldata_1[,col_num, drop = FALSE]
-colnames(coldata) <- c("Condition")
-#coldata_2 <- df[!grepl("-", coldata$Condition),]
+coldata_2 <- coldata_1[,col_num, drop = FALSE]
+colnames(coldata_2) <- c("Condition")
+coldata <- coldata_2[!grepl("-", coldata_2$Condition),,drop = FALSE]
+coldata <- droplevels(coldata)
 
 #all(rownames(coldata) %in% colnames(cts)) #test if the have same name
 cts <- cts[, rownames(coldata)] #order the colums of cts to be the same as in coldata
